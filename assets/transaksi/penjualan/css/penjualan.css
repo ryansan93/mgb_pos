@@ -107,6 +107,11 @@ div.btn-remove {
 	color: #000000;
 }
 
+div.btn-batal {
+	background-color: #ff7a7a;
+	border-color: #ff7a7a;
+}
+
 div.jumlah.disable {
 	background-color: #dedede;
 	border-color: #dedede;
@@ -125,7 +130,7 @@ div.btn-remove.disable {
 	color: #000000;
 }
 
-div.button:hover {
+div.button:not(.disable):hover {
 	background-color: #ff8f26;
 	border: 1px solid #ff8f26;
 	color: #ffffff;
@@ -163,4 +168,8 @@ div.btn-tunai[data-aktif="1"], div.btn-kartu[data-aktif="1"] {
 	background-color: #ff8f26;
 	border: 1px solid #ff8f26;
 	color: #ffffff;
+}
+
+tr.bayar:hover td {
+	background-color: #f5f5f5;
 }

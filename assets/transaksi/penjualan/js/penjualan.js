@@ -951,7 +951,12 @@ var jual = {
                     $(this).priceFormat(Config[$(this).data('tipe')]);
                 });
 
-                $(this).find('.btn-simpan').click(function() { jual.savePenjualan('simpan'); });
+                if ( !empty(kode_member) ) {
+                    $(this).find('.btn-simpan').click(function() { jual.savePenjualan('simpan'); });
+                } else {
+                    $(this).find('.btn-simpan').css({'background-color': '#dedede', 'border-color': '#dedede'});
+                    $(this).find('.btn-simpan').addClass('disable');
+                }
                 $(this).find('.btn-lanjut').click(function() { jual.savePenjualan('lanjut'); });
                 $(this).find('.btn-batal').click(function() { $('.modal').modal('hide'); });
             });
@@ -1241,6 +1246,15 @@ var jual = {
 
                                         return false;
                                     }
+                                },
+                                print_check_list: {
+                                    label: '<i class="fa fa-print"></i> PRINT CHECK LIST',
+                                    className: 'btn-primary',
+                                    callback: function() {
+                                        jual.printCheckList();
+
+                                        return false;
+                                    }
                                 }
                             }
                         });
@@ -1270,6 +1284,73 @@ var jual = {
             }
         });
     }, // end - printNota
+
+    printCheckList: function() {
+        $.ajax({
+            url: 'transaksi/Penjualan/printCheckList',
+            data: {
+                'params': kodeFaktur
+            },
+            type: 'POST',
+            dataType: 'JSON',
+            beforeSend: function() {},
+            success: function(data) {
+                if ( data.status != 1 ) {
+                    bootbox.alert(data.message);
+                }
+            }
+        });
+    }, // end - printNota
+
+    modalListBayar: function () {
+        $('.modal').modal('hide');
+
+        $.get('transaksi/Penjualan/modalListBayar',{
+        },function(data){
+            var _options = {
+                className : 'large',
+                message : data,
+                addClass : 'form',
+                onEscape: true,
+            };
+            bootbox.dialog(_options).bind('shown.bs.modal', function(){
+                $(this).find('.modal-header').css({'padding-top': '0px'});
+                $(this).find('.modal-dialog').css({'width': '50%', 'max-width': '100%'});
+
+                $('input').keyup(function(){
+                    $(this).val($(this).val().toUpperCase());
+                });
+
+                $('[data-tipe=integer],[data-tipe=angka],[data-tipe=decimal]').each(function(){
+                    $(this).priceFormat(Config[$(this).data('tipe')]);
+                });
+
+                // $(this).find('.button').click(function() {
+                //     jenis_pesanan = $(this).data('kode');
+                //     nama_jenis_pesanan = $(this).find('span b').text();
+
+                //     if ( empty(member) ) {
+                //         jual.modalPilihMember();
+                //     } else {
+                //         $('.list_menu').find('.jenis_pesanan').attr('data-kode', jenis_pesanan);
+                //         $('.list_menu').find('.jenis_pesanan').text(nama_jenis_pesanan);
+
+                //         $('div.kategori').find('ul.kategori li[data-aktif=1]').click();
+
+                //         $('.modal').modal('hide');
+                //     }
+                // });
+            });
+        },'html');
+    }, // end - modalListBayar
+
+    openModalPembayaran: function(elm) {
+        var tr = $(elm);
+        kodeFaktur = $(tr).find('td.kode_faktur').text();
+        gTotal = numeral.unformat($(tr).find('td.total').text());
+
+        jual.modalPembayaran();
+    }, // end - openModalPembayaran
 };
 
 jual.start_up();

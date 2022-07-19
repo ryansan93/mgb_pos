@@ -1,6 +1,5 @@
 <div class="modal-header no-padding header" style="">
 	<span class="modal-title"><label class="label-control">Pilih Jenis Pesanan</label></span>
-	<button type="button" class="close" data-dismiss="modal" style="color: #000000;">&times;</button>
 </div>
 <div class="modal-body body no-padding">
 	<div class="row">

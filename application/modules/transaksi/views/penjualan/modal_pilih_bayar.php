@@ -16,7 +16,7 @@
 				</div>
 			</div>
 			<div class="col-md-12 no-padding" style="height: 100px; padding-top: 2%;">
-				<div class="col-md-12 text-center cursor-p btn-batal button" style="height: 100%; display: flex; justify-content: center; align-items: center; background-color: #ff7a7a; border-color: #ff7a7a;">
+				<div class="col-md-12 text-center cursor-p btn-batal button" style="height: 100%; display: flex; justify-content: center; align-items: center;">
 					<span><b>BATAL</b></span>
 				</div>
 			</div>

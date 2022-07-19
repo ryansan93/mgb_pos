@@ -64,8 +64,8 @@
 						</div>
 					</div>
 					<div class="col-md-6 no-padding" style="height: 100%; padding-left: 1%;">
-						<div class="col-md-12 text-center cursor-p button" style="height: 100%; display: flex; justify-content: center; align-items: center;">
-							<span><b>LIST BELUM BAYAR</b></span>
+						<div class="col-md-12 text-center cursor-p button" style="height: 100%; display: flex; justify-content: center; align-items: center;" onclick="jual.modalListBayar()">
+							<span><b>LIST BAYAR</b></span>
 						</div>
 					</div>
 				</div>

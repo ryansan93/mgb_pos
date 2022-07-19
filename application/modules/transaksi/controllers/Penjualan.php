@@ -276,6 +276,8 @@ class Penjualan extends Public_Controller
             $m_jual->branch = $this->kodebranch;
             $m_jual->member = $params['member'];
             $m_jual->kode_member = $params['kode_member'];
+            $m_jual->kasir = $this->userid;
+            $m_jual->nama_kasir = $this->userdata['detail_user']['nama_detuser'];
             $m_jual->total = $params['sub_total'];
             $m_jual->diskon = $params['diskon'];
             $m_jual->ppn = $params['ppn'];
@@ -298,7 +300,7 @@ class Penjualan extends Public_Controller
                     $m_juali->total = $v_lm['total'];
                     $m_juali->save();
 
-                    if ( !empty($params['detail_menu']) ) {
+                    if ( !empty($v_lm['detail_menu']) ) {
                         foreach ($v_lm['detail_menu'] as $k_dm => $v_dm) {
                             $m_jualid = new \Model\Storage\JualItemDetail_model();
                             $m_jualid->faktur_item_kode = $kode_faktur_item;
@@ -437,7 +439,8 @@ class Penjualan extends Public_Controller
                 $jual_item[ $key_item ] = array(
                     'nama' => $v_ji['menu_nama'],
                     'jumlah' => $v_ji['jumlah'],
-                    'total' => $v_ji['total']
+                    'total' => $v_ji['total'],
+                    'detail' => $v_ji['jual_item_detail']
                 );
 
                 $jenis_pesanan[$key] = array(
@@ -449,7 +452,8 @@ class Penjualan extends Public_Controller
                     $jenis_pesanan[$key]['jual_item'][$key_item] = array(
                         'nama' => $v_ji['menu_nama'],
                         'jumlah' => $v_ji['jumlah'],
-                        'total' => $v_ji['total']
+                        'total' => $v_ji['total'],
+                        'detail' => $v_ji['jual_item_detail']
                     );
                 } else {
                     $jenis_pesanan[$key]['jual_item'][$key_item]['jumlah'] += $v_ji['jumlah'];
@@ -595,7 +599,136 @@ class Penjualan extends Public_Controller
         display_json( $this->result );
     }
 
+    public function printCheckList()
+    {
+        // $params = json_decode($this->input->post('params'), 1);
+        $params = $this->input->post('params');
+
+        try {
+            $data = $this->getDataNota( $params );
+
+            // Enter the share name for your USB printer here
+            $connector = new Mike42\Escpos\PrintConnectors\WindowsPrintConnector('Kasir');
+
+            /* Print a receipt */
+            $printer = new Mike42\Escpos\Printer($connector);
+            $printer -> initialize();
+
+            $printer -> setJustification(1);
+            $printer -> selectPrintMode(32);
+            $printer -> setTextSize(2, 1);
+            $printer -> text("CHECK LIST ORDER\n");
+            $printer = new Mike42\Escpos\Printer($connector);
+            $printer -> setJustification(0);
+            $printer -> selectPrintMode(1);
+            $lineNoTransaksi = sprintf('%-13s %1.05s %-15s','No. Transaksi',':', $data['kode_faktur']);
+            $printer -> text("$lineNoTransaksi\n");
+            $lineKasir = sprintf('%-13s %1.05s %-15s','Pelanggan',':', $data['member']);
+            $printer -> text("$lineKasir\n");
+            $lineTanggal = sprintf('%-13s %1.05s %-15s','Tanggal',':', date('Y-m-d h:m:s'));
+            $printer -> text("$lineTanggal\n");
+
+            $printer = new Mike42\Escpos\Printer($connector);
+            $printer -> setJustification(1);
+            $printer -> selectPrintMode(8);
+            $printer -> textRaw("\n================================\n\n");
+            // $printer -> textRaw("--------------------------------\n");
+            foreach ($data['jenis_pesanan'] as $k_jp => $v_jp) {
+                // $printer = new Mike42\Escpos\Printer($connector);
+                $printer -> setJustification(0);
+                $printer -> selectPrintMode(0);
+                $printer -> textRaw($v_jp['nama']."\n");
+
+                foreach ($v_jp['jual_item'] as $k_ji => $v_ji) {
+                    /* NOTE : TABLE
+                    $line = sprintf('%-13.40s %3.0f %-3.40s %9.40s %-2.40s %13.40s',$row['item_code'] , $row['item_qty'], $row['kali'], $n1,$row['hasil'], $n2); 
+                    */
+                    $line = sprintf('%0s %20s',$v_ji['nama'], angkaRibuan($v_ji['jumlah']).' x');
+                    $printer -> selectPrintMode(0);
+                    $printer -> text("$line\n");
+
+                    if ( !empty($v_ji['detail']) ) {
+                        foreach ($v_ji['detail'] as $k_det => $v_det) {
+                            $line_detail = sprintf('%2s %13s','', $v_det['menu_nama']);
+                            $printer -> selectPrintMode(1);
+                            $printer -> text("$line_detail\n");
+                        }
+                    }
+                }
+            }
+            $printer = new Mike42\Escpos\Printer($connector);
+            $printer -> setJustification(1);
+            $printer -> selectPrintMode(8);
+            $printer -> text("--------------------------------\n");
+
+            $printer -> cut();
+            $printer -> close();
+
+            $this->result['status'] = 1;
+        } catch (Exception $e) {
+            $this->result['message'] = "Couldn't print to this printer: " . $e -> getMessage() . "\n";
+        }
+
+        display_json( $this->result );
+    }
+
+    public function modalListBayar()
+    {
+        $today = date('Y-m-d');
+
+        $start_date = $today.' 00:00:00';
+        $end_date = $today.' 23:59:59';
+
+        $m_jual = new \Model\Storage\Jual_model();
+        $d_jual = $m_jual->whereBetween('tgl_trans', [$start_date, $end_date])->where('kasir', $this->userid)->with(['jual_item', 'jual_diskon', 'bayar'])->get();
+
+        $data_bayar = ($d_jual->count() > 0) ? $this->getDataBayar($d_jual) : null;
+        $data_belum_bayar = ($d_jual->count() > 0) ? $this->getDataBelumBayar($d_jual) : null;
+
+        $content['data'] = array(
+            'data_bayar' => $data_bayar,
+            'data_belum_bayar' => $data_belum_bayar
+        );
+
+        $html = $this->load->view($this->pathView . 'modal_list_bayar', $content, TRUE);
+
+        echo $html;
+    }
+
+    public function getDataBayar($_data)
+    {
+        $data = null;
+        foreach ($_data as $k_data => $v_data) {
+            if ( $v_data['lunas'] == 1 ) {
+                $data[ $v_data['kode_faktur'] ] = array(
+                    'kode_faktur' => $v_data['kode_faktur'],
+                    'pelanggan' => $v_data['member'],
+                    'total' => $v_data['grand_total']
+                );
+            }
+        }
+
+        return $data;
+    }
+
+    public function getDataBelumBayar($_data)
+    {
+        $data = null;
+        foreach ($_data as $k_data => $v_data) {
+            if ( $v_data['lunas'] == 0 ) {
+                $data[ $v_data['kode_faktur'] ] = array(
+                    'kode_faktur' => $v_data['kode_faktur'],
+                    'pelanggan' => $v_data['member'],
+                    'total' => $v_data['grand_total']
+                );
+            }
+        }
+
+        return $data;
+    }
+
     public function tes()
     {
+        $data = $this->getDataNota( 'JBR1-2207190002' );
     }
 }

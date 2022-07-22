@@ -40,7 +40,7 @@
 													<td><?php echo $value['pelanggan']; ?></td>
 													<td class="text-right total"><?php echo angkaDecimal($value['total']); ?></td>
 												</tr>
-												<?php $jml_transaksi++; $grand_total = $value['total']; ?>
+												<?php $jml_transaksi++; $grand_total += $value['total']; ?>
 											<?php endforeach ?>
 										<?php else: ?>
 											<tr>
@@ -86,7 +86,7 @@
 													<td><?php echo $value['pelanggan']; ?></td>
 													<td class="text-right"><?php echo angkaDecimal($value['total']); ?></td>
 												</tr>
-												<?php $jml_transaksi++; $grand_total = $value['total']; ?>
+												<?php $jml_transaksi++; $grand_total += $value['total']; ?>
 											<?php endforeach ?>
 										<?php else: ?>
 											<tr>

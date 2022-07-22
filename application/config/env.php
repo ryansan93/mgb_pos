@@ -12,8 +12,8 @@ $config['connection'] = array(
 		'driver'    => 'sqlsrv',
 
 		// NOTE : LIVE DATABASE
-		// 'host'      => 'WIN-HA1BBEG29J4\MGB',
-		// 'database'  => 'mgb_erp',
+		// 'host'      => '103.137.111.6',
+		// 'database'  => 'mgb_pos',
 		// 'username'  => 'sa',
 		// 'password'  => 'Mgb654321',
 

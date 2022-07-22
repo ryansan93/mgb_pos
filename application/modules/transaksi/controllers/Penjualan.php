@@ -175,7 +175,10 @@ class Penjualan extends Public_Controller
         $sql = "
             select menu.id, menu.kode_menu, menu.nama, menu.deskripsi, hm.harga as harga_jual, menu.kategori_menu_id, count(pm.kode_paket_menu) as jml_paket from menu menu
                 left join
-                    harga_menu hm 
+                    (
+                    select * from harga_menu where id in (
+                        select max(id) as id from harga_menu group by tanggal, jenis_pesanan_kode, menu_kode
+                    )) hm 
                     on
                         menu.kode_menu = hm.menu_kode 
                 left join

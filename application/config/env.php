@@ -12,16 +12,16 @@ $config['connection'] = array(
 		'driver'    => 'sqlsrv',
 
 		// NOTE : LIVE DATABASE
-		// 'host'      => '103.137.111.6',
-		// 'database'  => 'mgb_pos',
-		// 'username'  => 'sa',
-		// 'password'  => 'Mgb654321',
+		'host'      => '103.137.111.6',
+		'database'  => 'mgb_pos',
+		'username'  => 'sa',
+		'password'  => 'Mgb654321',
 
 		// NOTE : LOCAL DATABASE
-		'host'      => 'localhost',
-		'database'  => 'mgb_pos',
-		'username'  => '',
-		'password'  => '',
+		// 'host'      => 'localhost',
+		// 'database'  => 'mgb_pos',
+		// 'username'  => '',
+		// 'password'  => '',
 
 		// NOTE : TEST DATABASE
 		// 'host'      => '192.168.100.116',

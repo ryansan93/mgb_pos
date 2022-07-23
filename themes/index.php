@@ -187,9 +187,9 @@
                   </li>
                   <div class="dropdown-divider no-padding"></div>
                   <li class="dropdown-item">
-                    <a class="cursor-p" onclick="go_to_profile()">
-                      <i class="fa fa-user m-r-5 m-l-5"></i>
-                      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;My Profile
+                    <a class="cursor-p" onclick="modalHelp()">
+                      <i class="fa fa-cog m-r-5 m-l-5"></i>
+                      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Help
                     </a>
                   </li>
                   <li class="dropdown-item">
@@ -303,9 +303,50 @@
       });
     })(jQuery);
 
-    function go_to_profile (elm) {
-      var url = 'master/User/profile';
-      goToURL(url);
+    // function go_to_profile (elm) {
+    //   var url = 'master/User/profile';
+    //   goToURL(url);
+    // }
+
+    function modalHelp (elm) {
+        $('.modal').modal('hide');
+
+        $.get('transaksi/Penjualan/modalHelp',{
+        },function(data){
+            var _options = {
+                className : 'large',
+                message : data,
+                addClass : 'form',
+                onEscape: true,
+            };
+            bootbox.dialog(_options).bind('shown.bs.modal', function(){
+                $(this).find('.modal-header').css({'padding-top': '0px'});
+                $(this).find('.modal-dialog').css({'width': '50%', 'max-width': '100%'});
+
+                $('input').keyup(function(){
+                    $(this).val($(this).val().toUpperCase());
+                });
+
+                $('[data-tipe=integer],[data-tipe=angka],[data-tipe=decimal]').each(function(){
+                    $(this).priceFormat(Config[$(this).data('tipe')]);
+                });
+
+                $(this).find('.btn-tesprint').click(function() {
+                    $.ajax({
+                        url: 'transaksi/Penjualan/printTes',
+                        data: {},
+                        type: 'POST',
+                        dataType: 'JSON',
+                        beforeSend: function() {},
+                        success: function(data) {
+                            if ( data.status != 1 ) {
+                                bootbox.alert(data.message);
+                            }
+                        }
+                    });
+                });
+            });
+        },'html');
     }
   </script>
 

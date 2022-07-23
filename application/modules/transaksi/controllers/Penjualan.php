@@ -536,7 +536,7 @@ class Penjualan extends Public_Controller
                     /* NOTE : TABLE
                     $line = sprintf('%-13.40s %3.0f %-3.40s %9.40s %-2.40s %13.40s',$row['item_code'] , $row['item_qty'], $row['kali'], $n1,$row['hasil'], $n2); 
                     */
-                    $line = sprintf('%-13.40s %3.0s %-3.40s %9.40s %10.50s',$v_ji['nama'].' @ '.angkaRibuan($v_ji['jumlah']), '', '', '', angkaDecimal($v_ji['total']));
+                    $line = sprintf('%-13.40s %28.99s',$v_ji['nama'].' @ '.angkaRibuan($v_ji['jumlah']), angkaDecimal($v_ji['total']));
                     $printer -> text("$line\n");
                 }
             }
@@ -548,17 +548,17 @@ class Penjualan extends Public_Controller
             $printer = new Mike42\Escpos\Printer($connector);
             $printer -> setJustification(2);
             $printer -> selectPrintMode(1);
-            $lineTotal = sprintf('%-5.40s %-1.05s %13.40s','Total Belanja.','=', angkaDecimal($data['total']));
+            $lineTotal = sprintf('%18s %13.40s','Total Belanja. =', angkaDecimal($data['total']));
             $printer -> text("$lineTotal\n");
-            // $lineTotal = sprintf('%-5.40s %-1.05s %13.40s','PPN (11%).','=', angkaDecimal($data['ppn']));
+            // $lineTotal = sprintf('%18s %13.40s','PPN (11%).','=', angkaDecimal($data['ppn']));
             // $printer -> text("$lineTotal\n");
-            $lineDisc = sprintf('%-5.40s %-1.05s %13.40s','Disc.','=', '('.angkaDecimal($data['diskon']).')');
+            $lineDisc = sprintf('%18s %13.40s','Disc. =', '('.angkaDecimal($data['diskon']).')');
             $printer -> text("$lineDisc\n");
-            $lineTotal = sprintf('%-5.40s %-1.05s %13.40s','Total Bayar.','=', angkaDecimal($data['grand_total']));
+            $lineTotal = sprintf('%18s %13.40s','Total Bayar. =', angkaDecimal($data['grand_total']));
             $printer -> text("$lineTotal\n");
-            $lineTunai = sprintf('%-5.40s %-1.05s %13.40s','Uang Tunai.','=', angkaDecimal($data['bayar'][ count($data['bayar']) -1 ]['jml_bayar']));
+            $lineTunai = sprintf('%18s %13.40s','Uang Tunai. =', angkaDecimal($data['bayar'][ count($data['bayar']) -1 ]['jml_bayar']));
             $printer -> text("$lineTunai\n");
-            $lineKembalian = sprintf('%-5.40s %-1.05s %13.40s','Kembalian.','=', angkaDecimal($data['bayar'][ count($data['bayar']) -1 ]['jml_bayar'] - $data['grand_total']));
+            $lineKembalian = sprintf('%18s %13.40s','Kembalian. =', angkaDecimal($data['bayar'][ count($data['bayar']) -1 ]['jml_bayar'] - $data['grand_total']));
             $printer -> text("$lineKembalian\n");
 
             $printer = new Mike42\Escpos\Printer($connector);
@@ -589,7 +589,8 @@ class Penjualan extends Public_Controller
             $printer = new Mike42\Escpos\Printer($connector);
             $printer -> setJustification(1);
             $printer -> selectPrintMode(1);
-            $printer -> textRaw($data['bayar'][ count($data['bayar']) -1 ]['tgl_trans']."\n");
+            // $printer -> textRaw($data['bayar'][ count($data['bayar']) -1 ]['tgl_trans']."\n");
+            $printer -> textRaw(date('Y-m-d h:m:s')."\n");
 
             $printer -> cut();
             $printer -> close();
@@ -728,6 +729,38 @@ class Penjualan extends Public_Controller
         }
 
         return $data;
+    }
+
+    public function modalHelp()
+    {
+        $html = $this->load->view($this->pathView . 'modal_help', null, TRUE);
+
+        echo $html;
+    }
+
+    public function printTes()
+    {
+        try {
+            $connector = new Mike42\Escpos\PrintConnectors\WindowsPrintConnector('Kasir');
+
+            /* Print a receipt */
+            $printer = new Mike42\Escpos\Printer($connector);
+            $printer -> initialize();
+
+            $printer -> setJustification(1);
+            $printer -> selectPrintMode(32);
+            $printer -> setTextSize(2, 1);
+            $printer -> text("\n\nPRINT TEST\n\n");
+
+            $printer -> cut();
+            $printer -> close();
+
+            $this->result['status'] = 1;
+        } catch (Exception $e) {
+            $this->result['message'] = "Couldn't print to this printer: " . $e -> getMessage() . "\n";
+        }
+
+        display_json( $this->result );
     }
 
     public function tes()

@@ -81,7 +81,7 @@
 									<tbody>
 										<?php if ( !empty($data['data_bayar']) ): ?>
 											<?php foreach ($data['data_bayar'] as $key => $value): ?>
-												<tr>
+												<tr class="cursor-p bayar" onclick="jual.modalPrint('<?php echo $value['kode_faktur'] ?>')">
 													<td><?php echo $value['kode_faktur']; ?></td>
 													<td><?php echo $value['pelanggan']; ?></td>
 													<td class="text-right"><?php echo angkaDecimal($value['total']); ?></td>

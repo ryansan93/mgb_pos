@@ -536,7 +536,7 @@ class Penjualan extends Public_Controller
                     /* NOTE : TABLE
                     $line = sprintf('%-13.40s %3.0f %-3.40s %9.40s %-2.40s %13.40s',$row['item_code'] , $row['item_qty'], $row['kali'], $n1,$row['hasil'], $n2); 
                     */
-                    $line = sprintf('%-13.40s %28.99s',$v_ji['nama'].' @ '.angkaRibuan($v_ji['jumlah']), angkaDecimal($v_ji['total']));
+                    $line = sprintf('%-28s %13.40s',$v_ji['nama'].' @ '.angkaRibuan($v_ji['jumlah']), angkaDecimal($v_ji['total']));
                     $printer -> text("$line\n");
                 }
             }

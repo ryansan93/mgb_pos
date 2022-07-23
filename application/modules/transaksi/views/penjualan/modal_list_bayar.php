@@ -30,6 +30,7 @@
 											<th class="col-lg-3">No. Nota</th>
 											<th class="col-lg-4">Pelanggan</th>
 											<th class="col-lg-3">Total</th>
+											<th class="col-lg-1">Delete</th>
 										</tr>
 									</thead>
 									<tbody>
@@ -39,12 +40,13 @@
 													<td class="kode_faktur"><?php echo $value['kode_faktur']; ?></td>
 													<td><?php echo $value['pelanggan']; ?></td>
 													<td class="text-right total"><?php echo angkaDecimal($value['total']); ?></td>
+													<td><button type="button" class="btn btn-danger"><i class="fa fa-trash"></i></button></td>
 												</tr>
 												<?php $jml_transaksi++; $grand_total += $value['total']; ?>
 											<?php endforeach ?>
 										<?php else: ?>
 											<tr>
-												<td colspan="3">Data tidak ditemukan.</td>
+												<td colspan="4">Data tidak ditemukan.</td>
 											</tr>
 										<?php endif ?>
 									</tbody>
@@ -76,6 +78,7 @@
 											<th class="col-lg-3">No. Nota</th>
 											<th class="col-lg-4">Pelanggan</th>
 											<th class="col-lg-3">Total</th>
+											<th class="col-lg-1">Delete</th>
 										</tr>
 									</thead>
 									<tbody>
@@ -85,12 +88,13 @@
 													<td><?php echo $value['kode_faktur']; ?></td>
 													<td><?php echo $value['pelanggan']; ?></td>
 													<td class="text-right"><?php echo angkaDecimal($value['total']); ?></td>
+													<td><button type="button" class="btn btn-danger"><i class="fa fa-trash"></i></button></td>
 												</tr>
 												<?php $jml_transaksi++; $grand_total += $value['total']; ?>
 											<?php endforeach ?>
 										<?php else: ?>
 											<tr>
-												<td colspan="3">Data tidak ditemukan.</td>
+												<td colspan="4">Data tidak ditemukan.</td>
 											</tr>
 										<?php endif ?>
 									</tbody>

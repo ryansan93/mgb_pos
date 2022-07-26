@@ -26,31 +26,33 @@
 										<?php $hide = ($index == 0) ? '' : 'hide'; ?>
 										<div class="col-md-12 no-padding detail <?php echo $hide; ?>" data-kode="<?php echo $v_data['kode_paket_menu']; ?>" data-maxpilih="<?php echo $v_data['max_pilih']; ?>">
 											<?php foreach ($v_data['isi_paket_menu'] as $k => $val): ?>
-												<div class="col-md-4 text-left cursor-p no-padding menu_det" style="height: 100%; padding: 0% 1% 0% 1%;">
-													<table class="table table-bordered">
-														<tbody>
-															<tr>
-																<td class="pilih" data-pilih="0" data-kode="<?php echo $val['menu_kode']; ?>">
-																	<span><b><?php echo $val['menu']['nama']; ?></b></span>
-																	<i class="fa fa-check-circle hide"></i>
-																</td>
-															</tr>
-															<tr>
-																<td>
-																	<div class="col-md-6 no-padding jumlah" style="height: 25px; display: flex; justify-content: center; align-items: center; background-color: #ffffff; border: 1px solid #dedede;" data-min="<?php echo $val['jumlah_min']; ?>" data-max="<?php echo $val['jumlah_max']; ?>">
-																		<span style="font-weight: bold;"><?php echo angkaRibuan($val['jumlah_min']); ?></span>
-																	</div>
-																	<div class="col-md-3 no-padding cursor-p btn-remove disable" style="height: 25px; display: flex; justify-content: center; align-items: center;">
-																		<i class="fa fa-minus"></i>
-																	</div>
-																	<div class="col-md-3 no-padding cursor-p btn-add disable" style="height: 25px; display: flex; justify-content: center; align-items: center;">
-																		<i class="fa fa-plus"></i>
-																	</div>
-																</td>
-															</tr>
-														</tbody>
-													</table> 
-												</div>
+												<?php if ( isset($val['menu']['nama']) ): ?>
+													<div class="col-md-4 text-left cursor-p no-padding menu_det" style="height: 100%; padding: 0% 1% 0% 1%;">
+														<table class="table table-bordered">
+															<tbody>
+																<tr>
+																	<td class="pilih" data-pilih="0" data-kode="<?php echo $val['menu_kode']; ?>">
+																		<span><b><?php echo $val['menu']['nama']; ?></b></span>
+																		<i class="fa fa-check-circle hide"></i>
+																	</td>
+																</tr>
+																<tr>
+																	<td>
+																		<div class="col-md-6 no-padding jumlah" style="height: 25px; display: flex; justify-content: center; align-items: center; background-color: #ffffff; border: 1px solid #dedede;" data-min="<?php echo $val['jumlah_min']; ?>" data-max="<?php echo $val['jumlah_max']; ?>">
+																			<span style="font-weight: bold;"><?php echo angkaRibuan($val['jumlah_min']); ?></span>
+																		</div>
+																		<div class="col-md-3 no-padding cursor-p btn-remove disable" style="height: 25px; display: flex; justify-content: center; align-items: center;">
+																			<i class="fa fa-minus"></i>
+																		</div>
+																		<div class="col-md-3 no-padding cursor-p btn-add disable" style="height: 25px; display: flex; justify-content: center; align-items: center;">
+																			<i class="fa fa-plus"></i>
+																		</div>
+																	</td>
+																</tr>
+															</tbody>
+														</table> 
+													</div>
+												<?php endif ?>
 											<?php endforeach ?>
 										</div>
 										<?php $index++; ?>

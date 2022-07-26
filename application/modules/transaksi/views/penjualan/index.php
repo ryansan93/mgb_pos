@@ -6,7 +6,15 @@
 	</ul>
 </div>
 <div class="col-md-7 list_menu" style="height: 100%;">
-	<div class="col-md-12 no-padding detail_menu" style="height: 94%;"></div>
+	<div class="col-md-12 no-padding" style="padding: 0px 5px 10px 5px; height: 7%;">
+		<div class="input-group">
+            <span class="input-group-addon">
+              <i class="fa fa-search"></i>
+            </span>
+            <input type="text" class="form-control filter_menu" placeholder="Nama Menu" onkeyup="jual.filterMenu()">
+        </div>
+	</div>
+	<div class="col-md-12 no-padding detail_menu" style="height: 87%;"></div>
 	<div class="col-md-12 no-padding" style="height: 3%; padding-left: 5px; border-top: 1px solid #dedede;">
 		<span style="font-weight: bold;">CUSTOMER : <span class="member" data-kode="">-</span></span>
 	</div>
@@ -17,14 +25,19 @@
 <div class="col-md-3 nota" style="padding: 0.8% 0.8%; height: 100%;">
 	<div class="col-md-12 no-padding" style="height: 100%;">
 		<div class="col-md-12 no-padding" style="height: 10%;">
-			<div class="col-md-6 no-padding" style="height: 100%; padding-right: 5px;">
+			<div class="col-md-5 no-padding" style="height: 100%; padding-right: 5px;">
 				<div class="col-md-12 no-padding text-center cursor-p button" style="border: 1px solid #dedede; height: 100%; display: flex; justify-content: center; align-items: center;" onclick="jual.modalPilihMember()">
 					<span style=""><b><i class="fa fa-address-book-o" style="font-size: 28px;"></i></b></span>
 				</div>
 			</div>
-			<div class="col-md-6 no-padding" style="height: 100%; padding-left: 5px;">
+			<div class="col-md-5 no-padding" style="height: 100%; padding-left: 5px;">
 				<div class="col-md-12 no-padding text-center cursor-p button" style="border: 1px solid #dedede; height: 100%; display: flex; justify-content: center; align-items: center;" onclick="jual.modalJenisPesanan()">
 					<span style=""><b><i class="fa fa-cutlery" style="font-size: 28px;"></i></b></span>
+				</div>
+			</div>
+			<div class="col-md-2 no-padding" style="height: 100%; padding-left: 5px;">
+				<div class="col-md-12 no-padding text-center cursor-p button" style="border: 1px solid #dedede; height: 100%; display: flex; justify-content: center; align-items: center;" onclick="location.reload()">
+					<span style=""><b><i class="fa fa-refresh" style="font-size: 28px;"></i></b></span>
 				</div>
 			</div>
 		</div>

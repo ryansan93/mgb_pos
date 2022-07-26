@@ -61,7 +61,7 @@ div.detail_menu > div.menu > div.border {
 }
 
 div.nama_menu, div.harga_menu {
-	font-size: 16px;
+	font-size: 12px;
 	font-weight: bold;
 }
 
@@ -96,6 +96,18 @@ div.btn-erase {
 }
 
 div.btn-add {
+	background-color: #ff7a7a;
+	border-color: #ff7a7a;
+	color: #000000;
+}
+
+div.btn-add-member {
+	background-color: #acf2ae;
+	border-color: #acf2ae;
+	color: #000000;
+}
+
+div.btn-exit {
 	background-color: #ff7a7a;
 	border-color: #ff7a7a;
 	color: #000000;

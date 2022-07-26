@@ -36,11 +36,11 @@
 									<tbody>
 										<?php if ( !empty($data['data_belum_bayar']) ): ?>
 											<?php foreach ($data['data_belum_bayar'] as $key => $value): ?>
-												<tr class="cursor-p bayar" onclick="jual.openModalPembayaran(this)">
+												<tr class="cursor-p bayar">
 													<td class="kode_faktur"><?php echo $value['kode_faktur']; ?></td>
 													<td><?php echo $value['pelanggan']; ?></td>
 													<td class="text-right total"><?php echo angkaDecimal($value['total']); ?></td>
-													<td><button type="button" class="btn btn-danger"><i class="fa fa-trash"></i></button></td>
+													<td class="btn-delete text-center"><button type="button" class="btn btn-danger"><i class="fa fa-trash"></i></button></td>
 												</tr>
 												<?php $jml_transaksi++; $grand_total += $value['total']; ?>
 											<?php endforeach ?>
@@ -84,11 +84,11 @@
 									<tbody>
 										<?php if ( !empty($data['data_bayar']) ): ?>
 											<?php foreach ($data['data_bayar'] as $key => $value): ?>
-												<tr class="cursor-p bayar" onclick="jual.modalPrint('<?php echo $value['kode_faktur'] ?>')">
-													<td><?php echo $value['kode_faktur']; ?></td>
+												<tr class="cursor-p bayar">
+													<td class="kode_faktur"><?php echo $value['kode_faktur']; ?></td>
 													<td><?php echo $value['pelanggan']; ?></td>
 													<td class="text-right"><?php echo angkaDecimal($value['total']); ?></td>
-													<td><button type="button" class="btn btn-danger"><i class="fa fa-trash"></i></button></td>
+													<td class="btn-delete text-center"><button type="button" class="btn btn-danger"><i class="fa fa-trash"></i></button></td>
 												</tr>
 												<?php $jml_transaksi++; $grand_total += $value['total']; ?>
 											<?php endforeach ?>

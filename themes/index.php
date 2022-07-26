@@ -3,13 +3,14 @@
 
 <head>
   <base href="<?php echo base_url() ?>" />
+  <link rel="shortcut icon" type="image/x-icon" href="assets/images/logo.png">
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="description" content="">
   <meta name="author" content="Dashboard">
   <meta name="keyword" content="Dashboard, Bootstrap, Admin, Template, Theme, Responsive, Fluid, Retina">
 
-  <title>MGB POS</title>
+  <title><?php echo $this->config->item('judul_aplikasi'); ?></title>
 
   <?php // CSS files ?>
   <?php if (isset($css_files) && is_array($css_files)) : ?>
@@ -78,7 +79,14 @@
           <span class="navbar-toggler-icon"></span>
         </button> -->
 
-        <div class="col-md-8"><h4>MGB FRIED CHICKEN</h4></div>
+        <div class="col-md-8 navbar-nav ml-auto mt-2 mt-lg-0 pull-right">
+          <div class="col-md-1" style="padding-left: 0px;">
+            <img src="assets/images/logo.png" width="90%">
+          </div>
+          <div class="col-md-11" style="padding-left: 0px;">
+            <h4><?php echo $this->config->item('nama_aplikasi'); ?></h4>
+          </div>
+        </div>
 
         <div class="collapse navbar-collapse" id="navbarSupportedContent">
           <!-- <?php 

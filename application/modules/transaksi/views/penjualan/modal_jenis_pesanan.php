@@ -20,5 +20,10 @@
 					<?php } ?>
 				</div>
 		<?php } ?>
+		<div class="col-md-12" style="height: 100px; padding-top: 2%;">
+			<div class="col-md-12 text-center cursor-p btn-exit button" style="height: 100%; display: flex; justify-content: center; align-items: center;">
+				<span><b>KELUAR</b></span>
+			</div>
+		</div>
 	</div>
 </div>

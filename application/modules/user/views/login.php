@@ -3,12 +3,13 @@
 
 <head>
   <base href="<?php echo base_url() ?>" />
+  <link rel="shortcut icon" type="image/x-icon" href="assets/images/logo.png">
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="description" content="">
   <meta name="author" content="Dashboard">
   <meta name="keyword" content="Dashboard, Bootstrap, Admin, Template, Theme, Responsive, Fluid, Retina">
-  <title>MGB POS</title>
+  <title><?php echo $this->config->item('judul_aplikasi'); ?></title>
 
   <!-- Favicons -->
   <!-- <link href="assets/themes/img/favicon.png" rel="icon">
@@ -39,7 +40,8 @@
     <div class="container">
       <div class="form-login">
         <div class="login-heading text-center">
-          <h2 class="form-login-heading">MGB POS</h2>
+          <!-- <h2 class="form-login-heading"><?php echo $this->config->item('judul_aplikasi'); ?></h2> -->
+          <img src="assets/images/logo.png" width="30%" height="30%">
         </div>
         <!-- <div class="dropdown-divider no-padding"></div> -->
         <div class="login-contain">

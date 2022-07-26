@@ -221,3 +221,6 @@ $config['auth_export_excel'] = array(
     ['user' => 'admin-mgb', 'pin' => 'AdminMgbPelanggan123'],
   ),
 );
+
+$config['judul_aplikasi'] = 'COD POS';
+$config['nama_aplikasi'] = 'COD FRIED CHICKEN';

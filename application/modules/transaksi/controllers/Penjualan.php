@@ -286,6 +286,7 @@ class Penjualan extends Public_Controller
             $m_jual->ppn = $params['ppn'];
             $m_jual->grand_total = $params['grand_total'];
             $m_jual->lunas = 0;
+            $m_jual->mstatus = 1;
             $m_jual->save();
 
             foreach ($params['list_pesanan'] as $k_lp => $v_lp) {
@@ -332,6 +333,32 @@ class Penjualan extends Public_Controller
             $this->result['status'] = 1;
             $this->result['content'] = array('kode_faktur' => $kode_faktur);
             $this->result['message'] = 'Data berhasil di simpan.';
+        } catch (Exception $e) {
+            $this->result['message'] = $e->getMessage();
+        }
+
+        display_json( $this->result );
+    }
+
+    public function deletePenjualan()
+    {
+        $params = $this->input->post('params');
+
+        try {
+            $m_jual = new \Model\Storage\Jual_model();
+            $m_jual->where('kode_faktur', $params)->update(
+                array(
+                    'mstatus' => 0
+                )
+            );
+
+            $d_jual = $m_jual->where('kode_faktur', $params)->first();
+            
+            $deskripsi_log_gaktifitas = 'di-delete oleh ' . $this->userdata['detail_user']['nama_detuser'];
+            Modules::run( 'base/event/update', $d_jual, $deskripsi_log_gaktifitas );
+
+            $this->result['status'] = 1;
+            $this->result['message'] = 'Data berhasil di hapus.';
         } catch (Exception $e) {
             $this->result['message'] = $e->getMessage();
         }
@@ -678,25 +705,32 @@ class Penjualan extends Public_Controller
 
     public function modalListBayar()
     {
-        $today = date('Y-m-d');
+        try {
+            $today = date('Y-m-d');
 
-        $start_date = $today.' 00:00:00';
-        $end_date = $today.' 23:59:59';
+            $start_date = $today.' 00:00:00';
+            $end_date = $today.' 23:59:59';
 
-        $m_jual = new \Model\Storage\Jual_model();
-        $d_jual = $m_jual->whereBetween('tgl_trans', [$start_date, $end_date])->where('kasir', $this->userid)->with(['jual_item', 'jual_diskon', 'bayar'])->get();
+            $m_jual = new \Model\Storage\Jual_model();
+            $d_jual = $m_jual->whereBetween('tgl_trans', [$start_date, $end_date])->where('kasir', $this->userid)->where('mstatus', 1)->with(['jual_item', 'jual_diskon', 'bayar'])->get();
 
-        $data_bayar = ($d_jual->count() > 0) ? $this->getDataBayar($d_jual) : null;
-        $data_belum_bayar = ($d_jual->count() > 0) ? $this->getDataBelumBayar($d_jual) : null;
+            $data_bayar = ($d_jual->count() > 0) ? $this->getDataBayar($d_jual) : null;
+            $data_belum_bayar = ($d_jual->count() > 0) ? $this->getDataBelumBayar($d_jual) : null;
 
-        $content['data'] = array(
-            'data_bayar' => $data_bayar,
-            'data_belum_bayar' => $data_belum_bayar
-        );
+            $content['data'] = array(
+                'data_bayar' => $data_bayar,
+                'data_belum_bayar' => $data_belum_bayar
+            );
 
-        $html = $this->load->view($this->pathView . 'modal_list_bayar', $content, TRUE);
+            $html = $this->load->view($this->pathView . 'modal_list_bayar', $content, TRUE);
+            
+            $this->result['html'] = $html;
+            $this->result['status'] = 1;
+        } catch (Exception $e) {
+            $this->result['message'] = "Couldn't print to this printer: " . $e -> getMessage() . "\n";
+        }
 
-        echo $html;
+        display_json( $this->result );
     }
 
     public function getDataBayar($_data)
@@ -756,6 +790,26 @@ class Penjualan extends Public_Controller
             $printer -> close();
 
             $this->result['status'] = 1;
+        } catch (Exception $e) {
+            $this->result['message'] = "Couldn't print to this printer: " . $e -> getMessage() . "\n";
+        }
+
+        display_json( $this->result );
+    }
+
+    public function cekPinOtorisasi()
+    {
+        $pin = $this->input->post('pin');
+
+        try {
+            $m_po = new \Model\Storage\PinOtorisasi_model();
+            $d_po = $m_po->where('pin', $pin)->where('status', 1)->first();
+
+            if ( $d_po ) {
+                $this->result['status'] = 1;
+            } else {
+                $this->result['message'] = "PIN Otorisasi yang anda masukkan tidak di temukan.";
+            }
         } catch (Exception $e) {
             $this->result['message'] = "Couldn't print to this printer: " . $e -> getMessage() . "\n";
         }

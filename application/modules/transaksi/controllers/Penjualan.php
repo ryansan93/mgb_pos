@@ -461,11 +461,12 @@ class Penjualan extends Public_Controller
 
         $data = null;
         $jenis_pesanan = null;
-        foreach ($d_jual['jual_item'] as $k_ji => $v_ji) {
+        foreach ($d_jual['jual_item'] as $k_ji => $v_ji) {  
             $key = $v_ji['jenis_pesanan'][0]['nama'].' | '.$v_ji['jenis_pesanan'][0]['kode'];
             $key_item = $v_ji['menu_nama'].' | '.$v_ji['menu_kode'];
 
             if ( !isset($jenis_pesanan[$key]) ) {
+                $jual_item = null;
                 $jual_item[ $key_item ] = array(
                     'nama' => $v_ji['menu_nama'],
                     'jumlah' => $v_ji['jumlah'],
@@ -518,7 +519,7 @@ class Penjualan extends Public_Controller
             $data = $this->getDataNota( $params );
 
             // Enter the share name for your USB printer here
-            $connector = new Mike42\Escpos\PrintConnectors\WindowsPrintConnector('Kasir');
+            $connector = new Mike42\Escpos\PrintConnectors\WindowsPrintConnector('printer_pos_ryan');
 
             /* Print a receipt */
             $printer = new Mike42\Escpos\Printer($connector);
@@ -707,6 +708,7 @@ class Penjualan extends Public_Controller
     {
         try {
             $today = date('Y-m-d');
+            // $today = '2022-08-01';
 
             $start_date = $today.' 00:00:00';
             $end_date = $today.' 23:59:59';
@@ -775,7 +777,7 @@ class Penjualan extends Public_Controller
     public function printTes()
     {
         try {
-            $connector = new Mike42\Escpos\PrintConnectors\WindowsPrintConnector('Kasir');
+            $connector = new Mike42\Escpos\PrintConnectors\WindowsPrintConnector('printer_pos_ryan');
 
             /* Print a receipt */
             $printer = new Mike42\Escpos\Printer($connector);

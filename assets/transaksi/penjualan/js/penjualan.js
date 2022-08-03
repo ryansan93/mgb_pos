@@ -1362,7 +1362,7 @@ var jual = {
 
     verifikasiPinOtorisasi: function(kode_faktur) {
         bootbox.dialog({
-            message: '<p>Masukkan PIN Otorisasi untuk menghapus data.</p><p><input type="text" class="form-control text-center pin" data-tipe="angka" placeholder="PIN" /></p>',
+            message: '<p>Masukkan PIN Otorisasi untuk menghapus data.</p><p><input type="password" class="form-control text-center pin" data-tipe="angka" placeholder="PIN" /></p>',
             buttons: {
                 cancel: {
                     label: '<i class="fa fa-times"></i> Batal',

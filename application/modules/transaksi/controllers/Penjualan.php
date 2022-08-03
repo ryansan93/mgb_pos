@@ -590,7 +590,7 @@ class Penjualan extends Public_Controller
             $printer -> setJustification(1);
             $printer -> selectPrintMode(32);
             $printer -> setTextSize(2, 1);
-            $printer -> text("MGB\n");
+            $printer -> text("COD\n");
             $printer = new Mike42\Escpos\Printer($connector);
             $printer -> setJustification(1);
             $printer -> selectPrintMode(8);

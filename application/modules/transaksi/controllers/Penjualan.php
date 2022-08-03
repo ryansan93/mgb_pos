@@ -583,6 +583,8 @@ class Penjualan extends Public_Controller
             // Enter the share name for your USB printer here
             $connector = new Mike42\Escpos\PrintConnectors\WindowsPrintConnector('kasir');
 
+            cetak_r(  );
+
             /* Print a receipt */
             $printer = new Mike42\Escpos\Printer($connector);
             $printer -> initialize();

@@ -680,7 +680,11 @@ class Penjualan extends Public_Controller
             $printer -> setJustification(1);
             $printer -> selectPrintMode(1);
             // $printer -> textRaw($data['bayar'][ count($data['bayar']) -1 ]['tgl_trans']."\n");
-            $printer -> textRaw(date('Y-m-d h:m:s')."\n");
+
+            $conf = new \Model\Storage\Conf();
+            $now = $conf->getDate();
+
+            $printer -> textRaw($now['waktu']."\n");
 
             $printer -> cut();
             $printer -> close();
@@ -719,7 +723,11 @@ class Penjualan extends Public_Controller
             $printer -> text("$lineNoTransaksi\n");
             $lineKasir = sprintf('%-13s %1.05s %-15s','Pelanggan',':', $data['member']);
             $printer -> text("$lineKasir\n");
-            $lineTanggal = sprintf('%-13s %1.05s %-15s','Tanggal',':', date('Y-m-d h:m:s'));
+
+            $conf = new \Model\Storage\Conf();
+            $now = $conf->getDate();
+
+            $lineTanggal = sprintf('%-13s %1.05s %-15s','Tanggal',':', $now['waktu']);
             $printer -> text("$lineTanggal\n");
 
             $printer = new Mike42\Escpos\Printer($connector);

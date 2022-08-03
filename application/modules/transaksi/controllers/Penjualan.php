@@ -470,8 +470,70 @@ class Penjualan extends Public_Controller
                 $jual_item[ $key_item ] = array(
                     'nama' => $v_ji['menu_nama'],
                     'jumlah' => $v_ji['jumlah'],
+                    'total' => $v_ji['total']
+                );
+
+                $jenis_pesanan[$key] = array(
+                    'nama' => $v_ji['jenis_pesanan'][0]['nama'],
+                    'jual_item' => $jual_item
+                );
+            } else {
+                if ( !isset($jenis_pesanan[$key]['jual_item'][$key_item]) ) {
+                    $jenis_pesanan[$key]['jual_item'][$key_item] = array(
+                        'nama' => $v_ji['menu_nama'],
+                        'jumlah' => $v_ji['jumlah'],
+                        'total' => $v_ji['total']
+                    );
+                } else {
+                    $jenis_pesanan[$key]['jual_item'][$key_item]['jumlah'] += $v_ji['jumlah'];
+                    $jenis_pesanan[$key]['jual_item'][$key_item]['total'] += $v_ji['total'];
+                }
+            }
+        }
+
+        $data = array(
+            'kode_faktur' => $d_jual['kode_faktur'],
+            'tgl_trans' => $d_jual['tgl_trans'],
+            'member' => $d_jual['member'],
+            'kode_member' => $d_jual['kode_member'],
+            'total' => $d_jual['total'],
+            'diskon' => $d_jual['diskon'],
+            'ppn' => $d_jual['ppn'],
+            'grand_total' => $d_jual['grand_total'],
+            'lunas' => $d_jual['lunas'],
+            'jenis_pesanan' => $jenis_pesanan,
+            'bayar' => $d_jual['bayar']
+        );
+
+        return $data;
+    }
+
+    public function getDataCheckList($kode_faktur)
+    {
+        $m_jual = new \Model\Storage\Jual_model();
+        $d_jual = $m_jual->where('kode_faktur', $kode_faktur)->with(['jual_item', 'bayar'])->first()->toArray();
+
+        $data = null;
+        $jenis_pesanan = null;
+        foreach ($d_jual['jual_item'] as $k_ji => $v_ji) {  
+            $key = $v_ji['jenis_pesanan'][0]['nama'].' | '.$v_ji['jenis_pesanan'][0]['kode'];
+            $key_item = $v_ji['kode_faktur_item'].' | '.$v_ji['menu_nama'].' | '.$v_ji['menu_kode'];
+
+            $jual_item_detail = null;
+            foreach ($v_ji['jual_item_detail'] as $k_jid => $v_jid) {
+                $jual_item_detail[ $v_jid['menu_kode'] ] = array(
+                    'menu_kode' => $v_jid['menu_kode'],
+                    'menu_nama' => $v_jid['menu_nama']
+                );
+            }
+
+            if ( !isset($jenis_pesanan[$key]) ) {
+                $jual_item = null;
+                $jual_item[ $key_item ] = array(
+                    'nama' => $v_ji['menu_nama'],
+                    'jumlah' => $v_ji['jumlah'],
                     'total' => $v_ji['total'],
-                    'detail' => $v_ji['jual_item_detail']
+                    'detail' => $jual_item_detail
                 );
 
                 $jenis_pesanan[$key] = array(
@@ -484,7 +546,7 @@ class Penjualan extends Public_Controller
                         'nama' => $v_ji['menu_nama'],
                         'jumlah' => $v_ji['jumlah'],
                         'total' => $v_ji['total'],
-                        'detail' => $v_ji['jual_item_detail']
+                        'detail' => $jual_item_detail
                     );
                 } else {
                     $jenis_pesanan[$key]['jual_item'][$key_item]['jumlah'] += $v_ji['jumlah'];
@@ -519,7 +581,7 @@ class Penjualan extends Public_Controller
             $data = $this->getDataNota( $params );
 
             // Enter the share name for your USB printer here
-            $connector = new Mike42\Escpos\PrintConnectors\WindowsPrintConnector('printer_pos_ryan');
+            $connector = new Mike42\Escpos\PrintConnectors\WindowsPrintConnector('kasir');
 
             /* Print a receipt */
             $printer = new Mike42\Escpos\Printer($connector);
@@ -637,10 +699,10 @@ class Penjualan extends Public_Controller
         $params = $this->input->post('params');
 
         try {
-            $data = $this->getDataNota( $params );
+            $data = $this->getDataCheckList( $params );
 
             // Enter the share name for your USB printer here
-            $connector = new Mike42\Escpos\PrintConnectors\WindowsPrintConnector('Kasir');
+            $connector = new Mike42\Escpos\PrintConnectors\WindowsPrintConnector('kasir');
 
             /* Print a receipt */
             $printer = new Mike42\Escpos\Printer($connector);
@@ -777,7 +839,7 @@ class Penjualan extends Public_Controller
     public function printTes()
     {
         try {
-            $connector = new Mike42\Escpos\PrintConnectors\WindowsPrintConnector('printer_pos_ryan');
+            $connector = new Mike42\Escpos\PrintConnectors\WindowsPrintConnector('kasir');
 
             /* Print a receipt */
             $printer = new Mike42\Escpos\Printer($connector);

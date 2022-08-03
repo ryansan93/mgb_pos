@@ -70,10 +70,10 @@
 					</div>
 					<div id="bayar" class="tab-pane fade" role="tabpanel" style="padding-top: 10px;">
 						<?php $jml_transaksi = 0; $grand_total = 0; ?>
-						<div class="col-md-12 search left-inner-addon no-padding" style="margin-bottom: 10px;">
-							<i class="fa fa-search"></i><input class="form-control" type="search" data-table="tbl_bayar" placeholder="Search" onkeyup="filter_all(this)">
-						</div>
 						<div class="col-lg-12 no-padding">
+							<div class="col-md-12 search left-inner-addon no-padding" style="margin-bottom: 10px;">
+								<i class="fa fa-search"></i><input class="form-control" type="search" data-table="tbl_bayar" placeholder="Search" onkeyup="filter_all(this)">
+							</div>
 							<small>
 								<table class="table table-bordered tbl_bayar" style="margin-bottom: 0px;">
 									<thead>

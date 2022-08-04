@@ -583,8 +583,6 @@ class Penjualan extends Public_Controller
             // Enter the share name for your USB printer here
             $connector = new Mike42\Escpos\PrintConnectors\WindowsPrintConnector('kasir');
 
-            cetak_r(  );
-
             /* Print a receipt */
             $printer = new Mike42\Escpos\Printer($connector);
             $printer -> initialize();
@@ -779,8 +777,8 @@ class Penjualan extends Public_Controller
     public function modalListBayar()
     {
         try {
-            $today = date('Y-m-d');
-            // $today = '2022-08-01';
+            // $today = date('Y-m-d');
+            $today = '2022-08-02';
 
             $start_date = $today.' 00:00:00';
             $end_date = $today.' 23:59:59';
@@ -798,6 +796,27 @@ class Penjualan extends Public_Controller
 
             $html = $this->load->view($this->pathView . 'modal_list_bayar', $content, TRUE);
             
+            $this->result['html'] = $html;
+            $this->result['status'] = 1;
+        } catch (Exception $e) {
+            $this->result['message'] = "Couldn't print to this printer: " . $e -> getMessage() . "\n";
+        }
+
+        display_json( $this->result );
+    }
+
+    public function modalDetailFaktur()
+    {
+        $kode_faktur = $this->input->post('kode_faktur');
+
+        try {
+            $m_jual = new \Model\Storage\Jual_model();
+            $d_jual = $m_jual->where('kode_faktur', $kode_faktur)->where('mstatus', 1)->with(['jual_item', 'jual_diskon', 'bayar'])->first()->toArray();
+
+            $content['data'] = $d_jual;
+
+            $html = $this->load->view($this->pathView . 'modal_detail_faktur', $content, TRUE);
+
             $this->result['html'] = $html;
             $this->result['status'] = 1;
         } catch (Exception $e) {

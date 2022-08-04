@@ -1035,6 +1035,7 @@ var jual = {
                 $(this).find('.no_bukti').click(function() { jual.noBuktiKartu(); });
                 $(this).find('.btn-ok-tunai').click(function() { jual.savePembayaran(); });
                 $(this).find('.btn-ok-kartu').click(function() { jual.savePembayaran(); });
+                $(this).find('.btn-cancel').click(function() { $('.modal').modal('hide'); });
             });
         },'html');
     }, // end - modalPembayaran
@@ -1340,10 +1341,31 @@ var jual = {
                             $(this).priceFormat(Config[$(this).data('tipe')]);
                         });
 
+                        var modal_body = $(this).find('.modal-body');
+                        $.map( $(modal_body).find('li.nav-item'), function(li) {
+                            $(li).click(function() {
+                                var id = $(li).find('a').attr('href');
+
+                                $(modal_body).find('.tab-pane').removeClass('show');
+                                $(modal_body).find('.tab-pane').removeClass('active');
+
+                                $(modal_body).find(id).addClass('show');
+                                $(modal_body).find(id).addClass('active');
+                            });
+                        });
+
+                        $(this).find('tr.belum_bayar td:not(.btn-delete)').click(function() {
+                            var tr = $(this).closest('tr.belum_bayar');
+                            kodeFaktur = $(tr).find('td.kode_faktur').html();
+                            gTotal = numeral.unformat($(tr).find('td.total').html());
+
+                            jual.modalPembayaran();
+                        });
+
                         $(this).find('tr.bayar td:not(.btn-delete)').click(function() {
                             var tr = $(this).closest('tr.bayar');
                             var kode_faktur = $(tr).find('td.kode_faktur').html();
-                            jual.modalPrint( kode_faktur );
+                            jual.modalDetailFaktur( kode_faktur );
                         });
 
                         $(this).find('tr.bayar .btn').click(function() {
@@ -1359,6 +1381,64 @@ var jual = {
             }
         });
     }, // end - modalListBayar
+
+    modalDetailFaktur: function (kode_faktur) {
+        $('.modal').modal('hide');
+
+        $.ajax({
+            url: 'transaksi/Penjualan/modalDetailFaktur',
+            data: {
+                'kode_faktur': kode_faktur
+            },
+            type: 'POST',
+            dataType: 'JSON',
+            beforeSend: function() { showLoading(); },
+            success: function(data) {
+                hideLoading();
+                if ( data.status == 1 ) {
+                    var _options = {
+                        className : 'large',
+                        message : data.html,
+                        addClass : 'form',
+                        onEscape: true,
+                    };
+                    bootbox.dialog(_options).bind('shown.bs.modal', function(){
+                        $(this).find('.modal-header').css({'padding-top': '0px'});
+                        $(this).find('.modal-dialog').css({'width': '70%', 'max-width': '100%'});
+
+                        $('input').keyup(function(){
+                            $(this).val($(this).val().toUpperCase());
+                        });
+
+                        $('[data-tipe=integer],[data-tipe=angka],[data-tipe=decimal]').each(function(){
+                            $(this).priceFormat(Config[$(this).data('tipe')]);
+                        });
+
+                        $(this).find('.btn-cancel').click(function() { 
+                            jual.modalListBayar();
+                            // $(this).closest('.modal').modal('hide'); 
+                        });
+                        $(this).find('.btn-ok').click(function() { jual.modalPrint( kode_faktur ); });
+
+                        // $(this).find('tr.bayar td:not(.btn-delete)').click(function() {
+                        //     var tr = $(this).closest('tr.bayar');
+                        //     var kode_faktur = $(tr).find('td.kode_faktur').html();
+                        //     jual.modalPrint( kode_faktur );
+                        // });
+
+                        // $(this).find('tr.bayar .btn').click(function() {
+                        //     var tr = $(this).closest('tr.bayar');
+                        //     var kode_faktur = $(tr).find('td.kode_faktur').html();
+                        //     // jual.deletePenjualan( kode_faktur ); 
+                        //     jual.verifikasiPinOtorisasi( kode_faktur ); 
+                        // });
+                    });
+                } else {
+                    bootbox.alert(data.message);
+                }
+            }
+        });
+    }, // end - modalDetailFaktur
 
     verifikasiPinOtorisasi: function(kode_faktur) {
         bootbox.dialog({

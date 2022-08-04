@@ -36,7 +36,7 @@
 									<tbody>
 										<?php if ( !empty($data['data_belum_bayar']) ): ?>
 											<?php foreach ($data['data_belum_bayar'] as $key => $value): ?>
-												<tr class="cursor-p bayar">
+												<tr class="cursor-p belum_bayar">
 													<td class="kode_faktur"><?php echo $value['kode_faktur']; ?></td>
 													<td><?php echo $value['pelanggan']; ?></td>
 													<td class="text-right total"><?php echo angkaDecimal($value['total']); ?></td>

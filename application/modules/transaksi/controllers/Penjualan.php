@@ -777,8 +777,8 @@ class Penjualan extends Public_Controller
     public function modalListBayar()
     {
         try {
-            // $today = date('Y-m-d');
-            $today = '2022-08-02';
+            $today = date('Y-m-d');
+            // $today = '2022-08-02';
 
             $start_date = $today.' 00:00:00';
             $end_date = $today.' 23:59:59';

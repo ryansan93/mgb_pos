@@ -581,7 +581,9 @@ class Penjualan extends Public_Controller
             $data = $this->getDataNota( $params );
 
             // Enter the share name for your USB printer here
-            $connector = new Mike42\Escpos\PrintConnectors\WindowsPrintConnector('kasir');
+            // $connector = new Mike42\Escpos\PrintConnectors\WindowsPrintConnector('kasir');
+            $computer_name = gethostbyaddr($_SERVER['REMOTE_ADDR']);
+            $connector = new Mike42\Escpos\PrintConnectors\WindowsPrintConnector('smb://'.$computer_name.'/kasir');
 
             /* Print a receipt */
             $printer = new Mike42\Escpos\Printer($connector);
@@ -706,7 +708,9 @@ class Penjualan extends Public_Controller
             $data = $this->getDataCheckList( $params );
 
             // Enter the share name for your USB printer here
-            $connector = new Mike42\Escpos\PrintConnectors\WindowsPrintConnector('kasir');
+            // $connector = new Mike42\Escpos\PrintConnectors\WindowsPrintConnector('kasir');
+            $computer_name = gethostbyaddr($_SERVER['REMOTE_ADDR']);
+            $connector = new Mike42\Escpos\PrintConnectors\WindowsPrintConnector('smb://'.$computer_name.'/kasir');
 
             /* Print a receipt */
             $printer = new Mike42\Escpos\Printer($connector);
@@ -868,7 +872,9 @@ class Penjualan extends Public_Controller
     public function printTes()
     {
         try {
-            $connector = new Mike42\Escpos\PrintConnectors\WindowsPrintConnector('kasir');
+            // $connector = new Mike42\Escpos\PrintConnectors\WindowsPrintConnector('kasir');
+            $computer_name = gethostbyaddr($_SERVER['REMOTE_ADDR']);
+            $connector = new Mike42\Escpos\PrintConnectors\WindowsPrintConnector('smb://'.$computer_name.'/kasir');
 
             /* Print a receipt */
             $printer = new Mike42\Escpos\Printer($connector);
@@ -912,6 +918,7 @@ class Penjualan extends Public_Controller
 
     public function tes()
     {
-        $data = $this->getDataNota( 'JBR1-2207190002' );
+        // $data = $this->getDataNota( 'JBR1-2207190002' );
+        echo gethostbyaddr($_SERVER['REMOTE_ADDR']);
     }
 }

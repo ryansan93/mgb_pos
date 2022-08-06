@@ -916,6 +916,268 @@ class Penjualan extends Public_Controller
         display_json( $this->result );
     }
 
+    public function getDataClosingShift($tanggal, $kasir)
+    {
+        $start_date = substr($tanggal, 0, 10).' 00:00:00';
+        $end_date = substr($tanggal, 0, 10).' 23:59:59';
+
+        $m_jual = new \Model\Storage\Jual_model();
+        $d_jual = $m_jual->whereBetween('tgl_trans', [$start_date, $end_date])->where('kasir', $kasir)->with(['jual_item', 'bayar'])->get();
+
+        $data = null;
+        $data_detail_transaksi = null;
+        $data_detail_pembayaran = null;
+        if ( $d_jual->count() > 0 ) {
+            $d_jual = $d_jual->toArray();
+
+            $data_detail_transaksi['grand_total'] = 0;
+            $data_detail_transaksi['grand_total_jumlah'] = 0;
+            $data_detail_pembayaran['grand_total'] = 0;
+
+            $data_detail_transaksi['detail']['item_terjual']['nama'] = 'item terjual';
+            $data_detail_transaksi['detail']['item_terjual']['jumlah'] = 0;
+            $data_detail_transaksi['detail']['item_terjual']['total'] = 0;
+
+            $data_detail_transaksi['detail']['item_belum_bayar']['nama'] = 'item belum bayar';
+            $data_detail_transaksi['detail']['item_belum_bayar']['jumlah'] = 0;
+            $data_detail_transaksi['detail']['item_belum_bayar']['total'] = 0;
+
+            $data_detail_transaksi['detail']['item_batal']['nama'] = 'item batal';
+            $data_detail_transaksi['detail']['item_batal']['jumlah'] = 0;
+            $data_detail_transaksi['detail']['item_batal']['total'] = 0;
+            foreach ($d_jual as $k_jual => $v_jual) {
+                if ( !empty($v_jual['bayar']) ) {
+                    foreach ($v_jual['bayar'] as $k_bayar => $v_bayar) {
+                        if ( $v_jual['mstatus'] == 1 && $v_jual['lunas'] == 1 ) {
+                            if ( $v_bayar['jenis_bayar'] == 'tunai' ) {
+                                $key_bayar = $v_bayar['jenis_bayar'];
+                                if ( !isset( $data_detail_pembayaran['detail'][ $key_bayar ] ) ) {
+                                    $data_detail_pembayaran['detail'][ $key_bayar ] = array(
+                                        'nama' => 'TUNAI',
+                                        'bayar' => $v_bayar['jml_bayar'],
+                                        'tagihan' => $v_bayar['jml_tagihan'],
+                                        'kembalian' => $v_bayar['jml_bayar'] - $v_bayar['jml_tagihan']
+                                    );
+                                } else {
+                                    $data_detail_pembayaran['detail'][ $key_bayar ]['bayar'] += $v_bayar['jml_bayar'];
+                                    $data_detail_pembayaran['detail'][ $key_bayar ]['tagihan'] += $v_bayar['jml_tagihan'];
+                                    $data_detail_pembayaran['detail'][ $key_bayar ]['kembalian'] += $v_bayar['jml_bayar'] - $v_bayar['jml_tagihan'];
+                                }
+                            } else {
+                                $key_bayar = $v_bayar['jenis_bayar'].' | '.$v_bayar['jenis_kartu_kode'];
+                                if ( !isset( $data_detail_pembayaran['detail'][ $key_bayar ] ) ) {
+                                    $data_detail_pembayaran['detail'][ $key_bayar ] = array(
+                                        'nama' => $v_bayar['jenis_kartu']['nama'],
+                                        'bayar' => $v_bayar['jml_bayar']
+                                    );
+                                } else {
+                                    $data_detail_pembayaran['detail'][ $key_bayar ]['bayar'] += $v_bayar['jml_bayar'];
+                                }
+                            }
+
+                            $data_detail_pembayaran['grand_total'] += $v_bayar['jml_tagihan'];
+                        }
+                    }
+                }
+
+                foreach ($v_jual['jual_item'] as $k_ji => $v_ji) {
+                    // LUNAS
+                    if ( $v_jual['mstatus'] == 1 && $v_jual['lunas'] == 1 ) {
+                        if ( !isset($data_detail_transaksi['detail']['item_terjual']['detail'][ $v_ji['menu_kode'] ]) ) {
+                            $data_detail_transaksi['detail']['item_terjual']['detail'][ $v_ji['menu_kode'] ] = array(
+                                'nama' => $v_ji['menu_nama'],
+                                'jumlah' => $v_ji['jumlah'],
+                                'total' => $v_ji['total']
+                            );
+                        } else {
+                            $data_detail_transaksi['detail']['item_terjual']['detail'][ $v_ji['menu_kode'] ]['jumlah'] += $v_ji['jumlah'];
+                            $data_detail_transaksi['detail']['item_terjual']['detail'][ $v_ji['menu_kode'] ]['total'] += $v_ji['total'];
+                        }
+                        $data_detail_transaksi['detail']['item_terjual']['jumlah'] += $v_ji['jumlah'];
+                        $data_detail_transaksi['detail']['item_terjual']['total'] += $v_ji['total'];
+
+                        $data_detail_transaksi['grand_total_jumlah'] += $v_ji['jumlah'];
+                        $data_detail_transaksi['grand_total'] += $v_ji['total'];
+                    }
+                    // BELUM LUNAS
+                    if ( $v_jual['mstatus'] == 1 && $v_jual['lunas'] == 0 ) {
+                        if ( !isset($data_detail_transaksi['detail']['item_belum_bayar']['detail'][ $v_ji['menu_kode'] ]) ) {
+                            $data_detail_transaksi['detail']['item_belum_bayar']['detail'][ $v_ji['menu_kode'] ] = array(
+                                'nama' => $v_ji['menu_nama'],
+                                'jumlah' => $v_ji['jumlah'],
+                                'total' => $v_ji['total']
+                            );
+                        } else {
+                            $data_detail_transaksi['detail']['item_belum_bayar']['detail'][ $v_ji['menu_kode'] ]['jumlah'] += $v_ji['jumlah'];
+                            $data_detail_transaksi['detail']['item_belum_bayar']['detail'][ $v_ji['menu_kode'] ]['total'] += $v_ji['total'];
+                        }
+                        $data_detail_transaksi['detail']['item_belum_bayar']['jumlah'] += $v_ji['jumlah'];
+                        $data_detail_transaksi['detail']['item_belum_bayar']['total'] += $v_ji['total'];
+
+                        $data_detail_transaksi['grand_total_jumlah'] += $v_ji['jumlah'];
+                        $data_detail_transaksi['grand_total'] += $v_ji['total'];
+                    }
+                    // BATAL
+                    if ( $v_jual['mstatus'] == 0 ) {
+                        if ( !isset($data_detail_transaksi['detail']['item_batal']['detail'][ $v_ji['menu_kode'] ]) ) {
+                            $data_detail_transaksi['detail']['item_batal']['detail'][ $v_ji['menu_kode'] ] = array(
+                                'nama' => $v_ji['menu_nama'],
+                                'jumlah' => $v_ji['jumlah'],
+                                'total' => $v_ji['total']
+                            );
+                        } else {
+                            $data_detail_transaksi['detail']['item_batal']['detail'][ $v_ji['menu_kode'] ]['jumlah'] += $v_ji['jumlah'];
+                            $data_detail_transaksi['detail']['item_batal']['detail'][ $v_ji['menu_kode'] ]['total'] += $v_ji['total'];
+                        }
+                        $data_detail_transaksi['detail']['item_batal']['jumlah'] += $v_ji['jumlah'];
+                        $data_detail_transaksi['detail']['item_batal']['total'] += $v_ji['total'];
+                    }
+                }
+            }
+        }
+
+        $data = array(
+            'detail_transaksi' => $data_detail_transaksi,
+            'detail_pembayaran' => $data_detail_pembayaran
+        );
+
+        return $data;
+    }
+
+    public function printClosingShift()
+    {
+        try {
+            $data = $this->getDataClosingShift( date('Y-m-d'), $this->userid );
+
+            $nama_user = $this->userdata['detail_user']['nama_detuser'];
+
+            $conf = new \Model\Storage\Conf();
+            $now = $conf->getDate();
+
+            // Enter the share name for your USB printer here
+            $connector = new Mike42\Escpos\PrintConnectors\WindowsPrintConnector('kasir');
+            // $computer_name = gethostbyaddr($_SERVER['REMOTE_ADDR']);
+            // $connector = new Mike42\Escpos\PrintConnectors\WindowsPrintConnector('smb://'.$computer_name.'/kasir');
+
+            /* Print a receipt */
+            $printer = new Mike42\Escpos\Printer($connector);
+            $printer -> initialize();
+
+            $printer -> setJustification(0);
+            $printer -> selectPrintMode(1);
+            $printer -> setTextSize(2, 1);
+            $printer -> text("LAPORAN SHIFT\n");
+            $printer = new Mike42\Escpos\Printer($connector);
+            $printer -> selectPrintMode(1);
+            $lineNoTransaksi = sprintf('%-13s %1.05s %-15s','Kasir',':', $nama_user);
+            $printer -> text("$lineNoTransaksi\n");
+            $lineKasir = sprintf('%-13s %1.05s %-15s','Tanggal',':', $now['waktu']);
+            $printer -> text("$lineKasir\n");
+
+            $printer = new Mike42\Escpos\Printer($connector);
+            $printer -> selectPrintMode(1);
+            $printer -> setTextSize(2, 1);
+            $printer -> textRaw("\nDETAIL TRANSAKSI\n");
+            $printer -> setJustification(1);
+            $printer -> selectPrintMode(8);
+            $printer -> textRaw("================================\n");
+
+            foreach ($data['detail_transaksi']['detail'] as $k_data => $v_dt) {
+                $total = 0;
+                $jumlah = 0;
+
+                $printer -> setJustification(0);
+                $printer -> selectPrintMode(1);
+                $printer -> textRaw(strtoupper($v_dt['nama'])."\n");
+
+                if ( isset($v_dt['detail']) ) {
+                    foreach ($v_dt['detail'] as $k_det => $v_det) {
+                        $line1 = sprintf('%-28s %13.40s', $v_det['nama'], '');
+                        $printer -> text("$line1\n");
+                        $line2 = sprintf('%-28s %13.40s', angkaRibuan($v_det['jumlah']), angkaDecimal($v_det['total']));
+                        $printer -> text("$line2\n");
+
+                        $total += $v_det['total'];
+                        $jumlah += $v_det['jumlah'];
+                    }
+
+                    $printer -> setJustification(1);
+                    $printer -> selectPrintMode(8);
+                    $printer -> text("--------------------------------\n");
+                    $printer -> setJustification(0);
+                    $printer -> selectPrintMode(1);
+                    $line_total = sprintf('%28s %13.40s', 'TOTAL ('.angkaRibuan($jumlah).')', angkaDecimal($total));
+                    $printer -> text("$line_total\n");
+                }
+
+                $printer -> textRaw("\n");
+            }
+
+            $printer = new Mike42\Escpos\Printer($connector);
+            $printer -> setJustification(1);
+            $printer -> selectPrintMode(8);
+            $printer -> text("--------------------------------\n");
+
+            $printer = new Mike42\Escpos\Printer($connector);
+            $printer -> setJustification(2);
+            $printer -> selectPrintMode(1);
+            $lineGrandTotal = sprintf('%28s %13.40s','GRAND TOTAL ('.angkaRibuan($data['detail_transaksi']['grand_total_jumlah']).')', angkaDecimal($data['detail_transaksi']['grand_total']));
+            $printer -> text("$lineGrandTotal\n\n");
+
+            $printer = new Mike42\Escpos\Printer($connector);
+            $printer -> selectPrintMode(1);
+            $printer -> setTextSize(2, 1);
+            $printer -> textRaw("\nDETAIL PEMBAYARAN\n");
+            $printer -> setJustification(1);
+            $printer -> selectPrintMode(8);
+            $printer -> textRaw("================================\n");
+
+            foreach ($data['detail_pembayaran']['detail'] as $k_dp => $v_dp) {
+                $printer -> setJustification(0);
+                $printer -> selectPrintMode(1);
+                if ( stristr($k_dp, 'tunai') !== FALSE ) {
+                    // $printer -> textRaw(strtoupper($v_dp['nama'])."\n");
+
+                    // if ( isset($v_dp) ) {
+                    //     foreach ($v_dp as $k_det => $v_det) {
+                    //         if ( stristr($k_det, 'nama') === FALSE ) {
+                    //             $line = sprintf('%-28s %13.40s', strtoupper($k_det), angkaDecimal($v_det));
+                    //             $printer -> text("$line\n");
+                    //         }
+                    //     }
+                    // }
+                    $line = sprintf('%-28s %13.40s', strtoupper($v_dp['nama']), angkaDecimal($v_dp['tagihan']));
+                    $printer -> text("$line\n");
+                } else {
+                    $line = sprintf('%-28s %13.40s', strtoupper($v_dp['nama']), angkaDecimal($v_dp['bayar']));
+                    $printer -> text("$line\n");
+                }
+
+                $printer -> textRaw("\n");
+            }
+
+            $printer = new Mike42\Escpos\Printer($connector);
+            $printer -> setJustification(1);
+            $printer -> selectPrintMode(8);
+            $printer -> text("--------------------------------\n");
+
+            $printer = new Mike42\Escpos\Printer($connector);
+            $printer -> setJustification(2);
+            $printer -> selectPrintMode(1);
+            $lineGrandTotal = sprintf('%28s %13.40s','GRAND TOTAL', angkaDecimal($data['detail_pembayaran']['grand_total']));
+            $printer -> text("$lineGrandTotal\n\n");
+
+            $printer -> cut();
+            $printer -> close();
+
+            $this->result['status'] = 1;
+        } catch (Exception $e) {
+            $this->result['message'] = "Couldn't print to this printer: " . $e -> getMessage() . "\n";
+        }
+
+        display_json( $this->result );
+    }
+
     public function tes()
     {
         // $data = $this->getDataNota( 'JBR1-2207190002' );

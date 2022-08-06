@@ -26,6 +26,6 @@ class Jual_model extends Conf {
 
 	public function bayar()
 	{
-		return $this->hasMany('\Model\Storage\Bayar_model', 'faktur_kode', 'kode_faktur');
+		return $this->hasMany('\Model\Storage\Bayar_model', 'faktur_kode', 'kode_faktur')->with(['jenis_kartu']);
 	}
 }

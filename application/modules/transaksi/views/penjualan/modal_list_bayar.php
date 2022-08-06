@@ -121,5 +121,11 @@
 				</div>
 			</div>
 		</div>
+		<div class="col-lg-12">
+			<hr style="margin-top: 10px; margin-bottom: 10px;">
+		</div>
+		<div class="col-lg-12" style="padding-top: 10px;">
+			<button type="button" class="btn btn-success col-lg-12 btn_print_closing_shift"><i class="fa fa-print"></i> Print Closing Kasir</button>
+		</div>
 	</div>
 </div>

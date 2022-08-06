@@ -1381,6 +1381,10 @@ var jual = {
                             // jual.deletePenjualan( kode_faktur ); 
                             jual.verifikasiPinOtorisasi( kode_faktur ); 
                         });
+
+                        $(this).find('.btn_print_closing_shift').click(function() {
+                            jual.printClosingShift(); 
+                        });
                     });
                 } else {
                     bootbox.alert(data.message);
@@ -1546,6 +1550,21 @@ var jual = {
             }
         });
     }, // end - funcFilterMenu
+
+    printClosingShift: function() {
+        $.ajax({
+            url: 'transaksi/Penjualan/printClosingShift',
+            data: {},
+            type: 'POST',
+            dataType: 'JSON',
+            beforeSend: function() {},
+            success: function(data) {
+                if ( data.status != 1 ) {
+                    bootbox.alert(data.message);
+                }
+            }
+        });
+    }, // end - printNota
 };
 
 jual.start_up();

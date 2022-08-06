@@ -1362,6 +1362,13 @@ var jual = {
                             jual.modalPembayaran();
                         });
 
+                        $(this).find('tr.belum_bayar .btn').click(function() {
+                            var tr = $(this).closest('tr.bayar');
+                            var kode_faktur = $(tr).find('td.kode_faktur').html();
+                            // jual.deletePenjualan( kode_faktur ); 
+                            jual.verifikasiPinOtorisasi( kode_faktur ); 
+                        });
+
                         $(this).find('tr.bayar td:not(.btn-delete)').click(function() {
                             var tr = $(this).closest('tr.bayar');
                             var kode_faktur = $(tr).find('td.kode_faktur').html();

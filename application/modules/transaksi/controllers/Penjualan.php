@@ -574,9 +574,20 @@ class Penjualan extends Public_Controller
 
     public function printNota()
     {
-        // $params = json_decode($this->input->post('params'), 1);
         $params = $this->input->post('params');
 
+        if ( $this->config->item('paper_size') == '58' ) {
+            $result = $this->printNota58($params);
+        } else {
+            $result = $this->printNota80($params);
+        }
+
+        display_json( $result );
+    }
+
+    public function printNota58($params)
+    {
+        // $params = json_decode($this->input->post('params'), 1);
         try {
             $data = $this->getDataNota( $params );
 
@@ -696,13 +707,151 @@ class Penjualan extends Public_Controller
             $this->result['message'] = "Couldn't print to this printer: " . $e -> getMessage() . "\n";
         }
 
-        display_json( $this->result );
+        return $this->result;
+    }
+
+    public function printNota80($params)
+    {
+        // $params = json_decode($this->input->post('params'), 1);
+        try {
+            $data = $this->getDataNota( $params );
+
+            // Enter the share name for your USB printer here
+            $connector = new Mike42\Escpos\PrintConnectors\WindowsPrintConnector('kasir');
+            // $computer_name = gethostbyaddr($_SERVER['REMOTE_ADDR']);
+            // $connector = new Mike42\Escpos\PrintConnectors\WindowsPrintConnector('smb://'.$computer_name.'/kasir');
+
+            /* Print a receipt */
+            $printer = new Mike42\Escpos\Printer($connector);
+            $printer -> initialize();
+
+            $printer -> setJustification(1);
+            $printer -> selectPrintMode(32);
+            $printer -> setTextSize(2, 1);
+            $printer -> text("COD\n");
+            $printer = new Mike42\Escpos\Printer($connector);
+            $printer -> setJustification(1);
+            $printer -> selectPrintMode(8);
+            $printer -> text("FRIED CHICKEN\n");
+            $printer = new Mike42\Escpos\Printer($connector);
+            $printer -> setJustification(1);
+            $printer -> selectPrintMode(1);
+            $printer -> text($this->alamatbranch."\n");
+            $printer = new Mike42\Escpos\Printer($connector);
+            $printer -> setJustification(1);
+            $printer -> selectPrintMode(1);
+            $printer -> text("Telp. ".$this->telpbranch."\n\n");
+            $printer = new Mike42\Escpos\Printer($connector);
+            $printer -> setJustification(0);
+            $printer -> selectPrintMode(1);
+            $lineNoTransaksi = sprintf('%5.40s %1.05s %13.40s','No. Transaksi',':', $data['kode_faktur']);
+            $printer -> text("$lineNoTransaksi\n");
+            $lineKasir = sprintf('%-13.5s %1.05s %-13.40s','Kasir',':', $this->userdata['detail_user']['nama_detuser']);
+            $printer -> text("$lineKasir\n");
+
+            $printer = new Mike42\Escpos\Printer($connector);
+            $printer -> setJustification(1);
+            $printer -> selectPrintMode(8);
+            $printer -> textRaw("==========================================\n");
+            // $printer -> textRaw("--------------------------------\n");
+            foreach ($data['jenis_pesanan'] as $k_jp => $v_jp) {
+                // $printer = new Mike42\Escpos\Printer($connector);
+                $printer -> setJustification(0);
+                $printer -> selectPrintMode(1);
+                $printer -> textRaw($v_jp['nama']."\n");
+
+                foreach ($v_jp['jual_item'] as $k_ji => $v_ji) {
+                    /* NOTE : TABLE
+                    $line = sprintf('%-13.40s %3.0f %-3.40s %9.40s %-2.40s %13.40s',$row['item_code'] , $row['item_qty'], $row['kali'], $n1,$row['hasil'], $n2); 
+                    */
+                    $line = sprintf('%-46s %13.40s',$v_ji['nama'].' @ '.angkaRibuan($v_ji['jumlah']), angkaDecimal($v_ji['total']));
+                    $printer -> text("$line\n");
+                }
+            }
+            $printer = new Mike42\Escpos\Printer($connector);
+            $printer -> setJustification(1);
+            $printer -> selectPrintMode(8);
+            $printer -> text("------------------------------------------\n");
+
+            $printer = new Mike42\Escpos\Printer($connector);
+            $printer -> setJustification(2);
+            $printer -> selectPrintMode(1);
+            $lineTotal = sprintf('%46s %13.40s','Total Belanja. =', angkaDecimal($data['total']));
+            $printer -> text("$lineTotal\n");
+            // $lineTotal = sprintf('%46s %13.40s','PPN (11%).','=', angkaDecimal($data['ppn']));
+            // $printer -> text("$lineTotal\n");
+            $lineDisc = sprintf('%46s %13.40s','Disc. =', '('.angkaDecimal($data['diskon']).')');
+            $printer -> text("$lineDisc\n");
+            $lineTotal = sprintf('%46s %13.40s','Total Bayar. =', angkaDecimal($data['grand_total']));
+            $printer -> text("$lineTotal\n");
+            $lineTunai = sprintf('%46s %13.40s','Uang Tunai. =', angkaDecimal($data['bayar'][ count($data['bayar']) -1 ]['jml_bayar']));
+            $printer -> text("$lineTunai\n");
+            $lineKembalian = sprintf('%46s %13.40s','Kembalian. =', angkaDecimal($data['bayar'][ count($data['bayar']) -1 ]['jml_bayar'] - $data['grand_total']));
+            $printer -> text("$lineKembalian\n");
+
+            $printer = new Mike42\Escpos\Printer($connector);
+            $printer -> setJustification(1);
+            $printer -> selectPrintMode(8);
+            $printer -> textRaw("------------------------------------------\n");
+
+            // $printer = new Mike42\Escpos\Printer($connector);
+            // $printer -> setJustification(1);
+            // $printer -> selectPrintMode(1);
+            // $printer -> textRaw("Kalau Tidak Bisa Ambil Hatinya\n");
+
+            // $printer = new Mike42\Escpos\Printer($connector);
+            // $printer -> setJustification(1);
+            // $printer -> selectPrintMode(1);
+            // $printer -> textRaw("Ambil Saja Hikmahnya :D :D :D\n");
+
+            $printer = new Mike42\Escpos\Printer($connector);
+            $printer -> setJustification(1);
+            $printer -> selectPrintMode(1);
+            $printer -> textRaw("Selamat Menikmati\n");
+
+            $printer = new Mike42\Escpos\Printer($connector);
+            $printer -> setJustification(1);
+            $printer -> selectPrintMode(1);
+            $printer -> textRaw("*** TERIMA KASIH ***\n");
+
+            $printer = new Mike42\Escpos\Printer($connector);
+            $printer -> setJustification(1);
+            $printer -> selectPrintMode(1);
+            // $printer -> textRaw($data['bayar'][ count($data['bayar']) -1 ]['tgl_trans']."\n");
+
+            $conf = new \Model\Storage\Conf();
+            $now = $conf->getDate();
+
+            $printer -> textRaw($now['waktu']."\n");
+
+            $printer -> cut();
+            $printer -> close();
+
+            $this->result['status'] = 1;
+        } catch (Exception $e) {
+            $this->result['message'] = "Couldn't print to this printer: " . $e -> getMessage() . "\n";
+        }
+
+        return $this->result;
     }
 
     public function printCheckList()
     {
-        // $params = json_decode($this->input->post('params'), 1);
         $params = $this->input->post('params');
+
+        if ( $this->config->item('paper_size') == '58' ) {
+            $result = $this->printCheckList58($params);
+        } else {
+            $result = $this->printCheckList80($params);
+        }
+
+        display_json( $result );
+    }
+
+    public function printCheckList58($params)
+    {
+        // $params = json_decode($this->input->post('params'), 1);
+        // $params = $this->input->post('params');
 
         try {
             $data = $this->getDataCheckList( $params );
@@ -776,6 +925,85 @@ class Penjualan extends Public_Controller
         }
 
         display_json( $this->result );
+    }
+
+    public function printCheckList80($params)
+    {
+        // $params = json_decode($this->input->post('params'), 1);
+        // $params = $this->input->post('params');
+
+        try {
+            $data = $this->getDataCheckList( $params );
+
+            // Enter the share name for your USB printer here
+            $connector = new Mike42\Escpos\PrintConnectors\WindowsPrintConnector('kasir');
+            // $computer_name = gethostbyaddr($_SERVER['REMOTE_ADDR']);
+            // $connector = new Mike42\Escpos\PrintConnectors\WindowsPrintConnector('smb://'.$computer_name.'/kasir');
+
+            /* Print a receipt */
+            $printer = new Mike42\Escpos\Printer($connector);
+            $printer -> initialize();
+
+            $printer -> setJustification(1);
+            $printer -> selectPrintMode(32);
+            $printer -> setTextSize(2, 1);
+            $printer -> text("CHECK LIST ORDER\n\n");
+            $printer = new Mike42\Escpos\Printer($connector);
+            $printer -> setJustification(0);
+            $printer -> selectPrintMode(1);
+            $lineNoTransaksi = sprintf('%-13s %1.05s %-15s','No. Transaksi',':', $data['kode_faktur']);
+            $printer -> text("$lineNoTransaksi\n");
+            $lineKasir = sprintf('%-13s %1.05s %-15s','Pelanggan',':', $data['member']);
+            $printer -> text("$lineKasir\n");
+
+            $conf = new \Model\Storage\Conf();
+            $now = $conf->getDate();
+
+            $lineTanggal = sprintf('%-13s %1.05s %-15s','Tanggal',':', $now['waktu']);
+            $printer -> text("$lineTanggal\n");
+
+            $printer = new Mike42\Escpos\Printer($connector);
+            $printer -> setJustification(1);
+            $printer -> selectPrintMode(8);
+            $printer -> textRaw("\n==========================================\n\n");
+            // $printer -> textRaw("--------------------------------\n");
+            foreach ($data['jenis_pesanan'] as $k_jp => $v_jp) {
+                // $printer = new Mike42\Escpos\Printer($connector);
+                $printer -> setJustification(0);
+                $printer -> selectPrintMode(0);
+                $printer -> textRaw($v_jp['nama']."\n");
+
+                foreach ($v_jp['jual_item'] as $k_ji => $v_ji) {
+                    /* NOTE : TABLE
+                    $line = sprintf('%-13.40s %3.0f %-3.40s %9.40s %-2.40s %13.40s',$row['item_code'] , $row['item_qty'], $row['kali'], $n1,$row['hasil'], $n2); 
+                    */
+                    $line = sprintf('%-28s %13.40s',$v_ji['nama'], angkaRibuan($v_ji['jumlah']).' x');
+                    $printer -> selectPrintMode(0);
+                    $printer -> text("$line\n");
+
+                    if ( !empty($v_ji['detail']) ) {
+                        foreach ($v_ji['detail'] as $k_det => $v_det) {
+                            $line_detail = sprintf('%2s %13s','', $v_det['menu_nama']);
+                            $printer -> selectPrintMode(1);
+                            $printer -> text("$line_detail\n");
+                        }
+                    }
+                }
+            }
+            $printer = new Mike42\Escpos\Printer($connector);
+            $printer -> setJustification(1);
+            $printer -> selectPrintMode(8);
+            $printer -> text("------------------------------------------\n");
+
+            $printer -> cut();
+            $printer -> close();
+
+            $this->result['status'] = 1;
+        } catch (Exception $e) {
+            $this->result['message'] = "Couldn't print to this printer: " . $e -> getMessage() . "\n";
+        }
+
+        return $this->result;
     }
 
     public function modalListBayar()
@@ -1046,6 +1274,17 @@ class Penjualan extends Public_Controller
 
     public function printClosingShift()
     {
+        if ( $this->config->item('paper_size') == '58' ) {
+            $result = $this->printClosingShift58();
+        } else {
+            $result = $this->printClosingShift80();
+        }
+
+        display_json( $result );
+    }
+
+    public function printClosingShift58()
+    {
         try {
             $data = $this->getDataClosingShift( date('Y-m-d'), $this->userid );
 
@@ -1175,7 +1414,141 @@ class Penjualan extends Public_Controller
             $this->result['message'] = "Couldn't print to this printer: " . $e -> getMessage() . "\n";
         }
 
-        display_json( $this->result );
+        return $this->result;
+    }
+
+    public function printClosingShift80()
+    {
+        try {
+            $data = $this->getDataClosingShift( date('Y-m-d'), $this->userid );
+
+            $nama_user = $this->userdata['detail_user']['nama_detuser'];
+
+            $conf = new \Model\Storage\Conf();
+            $now = $conf->getDate();
+
+            // Enter the share name for your USB printer here
+            $connector = new Mike42\Escpos\PrintConnectors\WindowsPrintConnector('kasir');
+            // $computer_name = gethostbyaddr($_SERVER['REMOTE_ADDR']);
+            // $connector = new Mike42\Escpos\PrintConnectors\WindowsPrintConnector('smb://'.$computer_name.'/kasir');
+
+            /* Print a receipt */
+            $printer = new Mike42\Escpos\Printer($connector);
+            $printer -> initialize();
+
+            $printer -> setJustification(0);
+            $printer -> selectPrintMode(1);
+            $printer -> setTextSize(2, 1);
+            $printer -> text("LAPORAN SHIFT\n");
+            $printer = new Mike42\Escpos\Printer($connector);
+            $printer -> selectPrintMode(1);
+            $lineNoTransaksi = sprintf('%-13s %1.05s %-15s','Kasir',':', $nama_user);
+            $printer -> text("$lineNoTransaksi\n");
+            $lineKasir = sprintf('%-13s %1.05s %-15s','Tanggal',':', $now['waktu']);
+            $printer -> text("$lineKasir\n");
+
+            $printer = new Mike42\Escpos\Printer($connector);
+            $printer -> selectPrintMode(1);
+            $printer -> setTextSize(2, 1);
+            $printer -> textRaw("\nDETAIL TRANSAKSI\n");
+            $printer -> setJustification(1);
+            $printer -> selectPrintMode(8);
+            $printer -> textRaw("==========================================\n");
+
+            foreach ($data['detail_transaksi']['detail'] as $k_data => $v_dt) {
+                $total = 0;
+                $jumlah = 0;
+
+                $printer -> setJustification(0);
+                $printer -> selectPrintMode(1);
+                $printer -> textRaw(strtoupper($v_dt['nama'])."\n");
+
+                if ( isset($v_dt['detail']) ) {
+                    foreach ($v_dt['detail'] as $k_det => $v_det) {
+                        $line1 = sprintf('%-46s %13.40s', $v_det['nama'], '');
+                        $printer -> text("$line1\n");
+                        $line2 = sprintf('%-46s %13.40s', angkaRibuan($v_det['jumlah']), angkaDecimal($v_det['total']));
+                        $printer -> text("$line2\n");
+
+                        $total += $v_det['total'];
+                        $jumlah += $v_det['jumlah'];
+                    }
+
+                    $printer -> setJustification(1);
+                    $printer -> selectPrintMode(8);
+                    $printer -> text("------------------------------------------\n");
+                    $printer -> setJustification(0);
+                    $printer -> selectPrintMode(1);
+                    $line_total = sprintf('%46s %13.40s', 'TOTAL ('.angkaRibuan($jumlah).')', angkaDecimal($total));
+                    $printer -> text("$line_total\n");
+                }
+
+                $printer -> textRaw("\n");
+            }
+
+            $printer = new Mike42\Escpos\Printer($connector);
+            $printer -> setJustification(1);
+            $printer -> selectPrintMode(8);
+            $printer -> text("------------------------------------------\n");
+
+            $printer = new Mike42\Escpos\Printer($connector);
+            $printer -> setJustification(2);
+            $printer -> selectPrintMode(1);
+            $lineGrandTotal = sprintf('%46s %13.40s','GRAND TOTAL ('.angkaRibuan($data['detail_transaksi']['grand_total_jumlah']).')', angkaDecimal($data['detail_transaksi']['grand_total']));
+            $printer -> text("$lineGrandTotal\n\n");
+
+            $printer = new Mike42\Escpos\Printer($connector);
+            $printer -> selectPrintMode(1);
+            $printer -> setTextSize(2, 1);
+            $printer -> textRaw("\nDETAIL PEMBAYARAN\n");
+            $printer -> setJustification(1);
+            $printer -> selectPrintMode(8);
+            $printer -> textRaw("==========================================\n");
+
+            foreach ($data['detail_pembayaran']['detail'] as $k_dp => $v_dp) {
+                $printer -> setJustification(0);
+                $printer -> selectPrintMode(1);
+                if ( stristr($k_dp, 'tunai') !== FALSE ) {
+                    // $printer -> textRaw(strtoupper($v_dp['nama'])."\n");
+
+                    // if ( isset($v_dp) ) {
+                    //     foreach ($v_dp as $k_det => $v_det) {
+                    //         if ( stristr($k_det, 'nama') === FALSE ) {
+                    //             $line = sprintf('%-28s %13.40s', strtoupper($k_det), angkaDecimal($v_det));
+                    //             $printer -> text("$line\n");
+                    //         }
+                    //     }
+                    // }
+                    $line = sprintf('%-46s %13.40s', strtoupper($v_dp['nama']), angkaDecimal($v_dp['tagihan']));
+                    $printer -> text("$line\n");
+                } else {
+                    $line = sprintf('%-46s %13.40s', strtoupper($v_dp['nama']), angkaDecimal($v_dp['bayar']));
+                    $printer -> text("$line\n");
+                }
+
+                $printer -> textRaw("\n");
+            }
+
+            $printer = new Mike42\Escpos\Printer($connector);
+            $printer -> setJustification(1);
+            $printer -> selectPrintMode(8);
+            $printer -> text("------------------------------------------\n");
+
+            $printer = new Mike42\Escpos\Printer($connector);
+            $printer -> setJustification(2);
+            $printer -> selectPrintMode(1);
+            $lineGrandTotal = sprintf('%28s %13.40s','GRAND TOTAL', angkaDecimal($data['detail_pembayaran']['grand_total']));
+            $printer -> text("$lineGrandTotal\n\n");
+
+            $printer -> cut();
+            $printer -> close();
+
+            $this->result['status'] = 1;
+        } catch (Exception $e) {
+            $this->result['message'] = "Couldn't print to this printer: " . $e -> getMessage() . "\n";
+        }
+
+        return $this->result;
     }
 
     public function tes()

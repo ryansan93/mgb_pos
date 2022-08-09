@@ -156,7 +156,7 @@ class Penjualan extends Public_Controller
     public function getKategori()
     {
         $m_kategori_menu = new \Model\Storage\KategoriMenu_model();
-        $d_kategori_menu = $m_kategori_menu->orderBy('nama', 'asc')->get();
+        $d_kategori_menu = $m_kategori_menu->where('status', 1)->orderBy('nama', 'asc')->get();
 
         $data = null;
         if ( $d_kategori_menu->count() > 0 ) {

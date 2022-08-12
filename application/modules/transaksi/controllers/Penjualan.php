@@ -624,6 +624,12 @@ class Penjualan extends Public_Controller
             $lineKasir = sprintf('%-13.5s %1.05s %-13.40s','Kasir',':', $this->userdata['detail_user']['nama_detuser']);
             $printer -> text("$lineKasir\n");
 
+            if ( $this->config->item('print_jenis_bayar') == 1 ) {
+                $jenis_bayar = ($data['bayar']['jenis_bayar'] == 'tunai') ? 'TUNAI' : $data['bayar'][ count($data['bayar']) -1 ]['jenis_kartu']['nama'];
+                $lineBayar = sprintf('%-13.5s %1.05s %-13.40s','Bayar',':', $jenis_bayar);
+                $printer -> text("$lineBayar\n");
+            }
+
             $printer = new Mike42\Escpos\Printer($connector);
             $printer -> setJustification(1);
             $printer -> selectPrintMode(8);

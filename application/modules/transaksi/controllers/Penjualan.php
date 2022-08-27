@@ -366,6 +366,39 @@ class Penjualan extends Public_Controller
         display_json( $this->result );
     }
 
+    public function deletePembayaran()
+    {
+        $params = $this->input->post('params');
+
+        try {
+            $m_bayar = new \Model\Storage\Bayar_model();
+            $d_bayar = $m_bayar->where('id', $params)->first();
+
+            $total_bayar = $m_bayar->where('id', '<>', $params)->where('faktur_kode', $d_bayar->faktur_kode)->sum('jml_bayar');
+
+            if ( $d_bayar->jml_tagihan > $total_bayar ) {
+                $m_jual = new \Model\Storage\Jual_model();
+                $d_jual = $m_jual->where('kode_faktur', $d_bayar->faktur_kode)->update(
+                    array(
+                        'lunas' => 0
+                    )
+                );
+            }
+
+            $m_bayar->where('id', $params)->delete();
+
+            $deskripsi_log_gaktifitas = 'di-delete oleh ' . $this->userdata['detail_user']['nama_detuser'];
+            Modules::run( 'base/event/update', $d_bayar, $deskripsi_log_gaktifitas );
+
+            $this->result['status'] = 1;
+            $this->result['message'] = 'Data berhasil di hapus.';
+        } catch (Exception $e) {
+            $this->result['message'] = $e->getMessage();
+        }
+
+        display_json( $this->result );
+    }
+
     public function modalPilihBayar()
     {
         $content['data'] = null;
@@ -432,7 +465,7 @@ class Penjualan extends Public_Controller
             $m_bayar->no_bukti = $params['no_bukti'];
             $m_bayar->save();
 
-            if ( $params['jml_bayar'] >= $params['jml_tagihan'] ) {
+            if ( $params['jml_bayar'] >= $params['sisa_tagihan'] ) {
                 $m_jual = new \Model\Storage\Jual_model();
                 $m_jual->where('kode_faktur', $params['faktur_kode'])->update(
                     array(
@@ -1016,7 +1049,7 @@ class Penjualan extends Public_Controller
     {
         try {
             $today = date('Y-m-d');
-            // $today = '2022-08-02';
+            // $today = '2022-08-21';
 
             $start_date = $today.' 00:00:00';
             $end_date = $today.' 23:59:59';
@@ -1069,10 +1102,25 @@ class Penjualan extends Public_Controller
         $data = null;
         foreach ($_data as $k_data => $v_data) {
             if ( $v_data['lunas'] == 1 ) {
+                $stts_salah_bayar = false;
+                $salah_bayar = 0;
+                if ( !empty($v_data['bayar']) ) {
+                    foreach ($v_data['bayar'] as $k_bayar => $v_bayar) {
+                        if ( $v_bayar['jml_tagihan'] >= $v_bayar['jml_bayar'] ) {
+                            $stts_salah_bayar = true;
+                        } else {
+                            $stts_salah_bayar = false;
+                        }
+
+                        $salah_bayar += $v_bayar['jml_bayar'];
+                    }
+                }
+
                 $data[ $v_data['kode_faktur'] ] = array(
                     'kode_faktur' => $v_data['kode_faktur'],
                     'pelanggan' => $v_data['member'],
-                    'total' => $v_data['grand_total']
+                    'total' => $v_data['grand_total'],
+                    'salah_bayar' => ($stts_salah_bayar == true && $salah_bayar > 0) ? $salah_bayar - $v_data['grand_total'] : 0
                 );
             }
         }
@@ -1085,10 +1133,18 @@ class Penjualan extends Public_Controller
         $data = null;
         foreach ($_data as $k_data => $v_data) {
             if ( $v_data['lunas'] == 0 ) {
+                $kurang_bayar = 0;
+                if ( !empty($v_data['bayar']) ) {
+                    foreach ($v_data['bayar'] as $k_bayar => $v_bayar) {
+                        $kurang_bayar += $v_bayar['jml_bayar'];
+                    }
+                }
+
                 $data[ $v_data['kode_faktur'] ] = array(
                     'kode_faktur' => $v_data['kode_faktur'],
                     'pelanggan' => $v_data['member'],
-                    'total' => $v_data['grand_total']
+                    'total' => $v_data['grand_total'],
+                    'kurang_bayar' => $v_data['grand_total'] - $kurang_bayar
                 );
             }
         }

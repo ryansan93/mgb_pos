@@ -5,6 +5,7 @@ var nama_jenis_pesanan = null;
 var detail_pesanan = null;
 var jenis_bayar = 'tunai';
 var gTotal = 0;
+var gKurangBayar = 0;
 var gBayar = 0;
 var dataPenjualan = null;
 var kodeKartu = null;
@@ -819,6 +820,7 @@ var jual = {
         $('.grandtotal').text(numeral.formatDec(grandtotal));
 
         gTotal = grandtotal;
+        gKurangBayar = grandtotal;
     }, // end - hitGrandTotal
 
     getPenjualan: function(action) {
@@ -998,9 +1000,13 @@ var jual = {
 
                 var modal_body = $(this).find('.modal-body');
 
-                var _gKembali = gBayar - gTotal;
+                var _gKembali = gBayar - gKurangBayar;
                 var gKembali = (_gKembali > 0) ? _gKembali : 0;
+
+                console.log( gKurangBayar );
+
                 $(modal_body).find('.gTotal').text( numeral.formatDec(gTotal) );
+                $(modal_body).find('.gKurangBayar').text( numeral.formatDec(gKurangBayar) );
                 $(modal_body).find('.gBayar').text( numeral.formatDec(gBayar) );
                 $(modal_body).find('.gKembali').text( numeral.formatDec(gKembali) );
 
@@ -1028,7 +1034,7 @@ var jual = {
                     $(modal_body).find('.form_pembayaran').addClass('hide');
                     $(modal_body).find('.'+jenis).removeClass('hide');
 
-                    gBayar = gTotal;
+                    gBayar = gKurangBayar;
                 });
                 $(this).find('.bayar').click(function() { jual.jumlahBayar(); });
                 $(this).find('.jenis_kartu').click(function() { jual.modalJenisKartu(); });
@@ -1209,10 +1215,11 @@ var jual = {
     }, // end - noBuktiKartu
 
     savePembayaran: function() {
-        if ( gBayar > 0 ) {
+        // if ( gBayar > 0 ) {
             var data = {
                 'faktur_kode': kodeFaktur,
                 'jml_tagihan': gTotal,
+                'sisa_tagihan': gKurangBayar,
                 'jml_bayar': gBayar,
                 'jenis_bayar': jenis_bayar,
                 'jenis_kartu_kode': kodeKartu,
@@ -1237,9 +1244,9 @@ var jual = {
                     }
                 }
             });
-        } else {
-            bootbox.alert('Harap isi jumlah bayar.');
-        }
+        // } else {
+        //     bootbox.alert('Harap isi jumlah bayar.');
+        // }
     }, // end - savePembayaran
 
     modalPrint: function(kode_faktur) {
@@ -1331,7 +1338,7 @@ var jual = {
                     };
                     bootbox.dialog(_options).bind('shown.bs.modal', function(){
                         $(this).find('.modal-header').css({'padding-top': '0px'});
-                        $(this).find('.modal-dialog').css({'width': '60%', 'max-width': '100%'});
+                        $(this).find('.modal-dialog').css({'width': '75%', 'max-width': '100%'});
 
                         $('input').keyup(function(){
                             $(this).val($(this).val().toUpperCase());
@@ -1358,13 +1365,15 @@ var jual = {
                             var tr = $(this).closest('tr.belum_bayar');
                             kodeFaktur = $(tr).find('td.kode_faktur').html();
                             gTotal = numeral.unformat($(tr).find('td.total').html());
+                            gKurangBayar = gTotal;
 
                             jual.modalPembayaran();
                         });
 
                         $(this).find('tr.belum_bayar .btn').click(function() {
-                            var tr = $(this).closest('tr.bayar');
+                            var tr = $(this).closest('tr.belum_bayar');
                             var kode_faktur = $(tr).find('td.kode_faktur').html();
+
                             // jual.deletePenjualan( kode_faktur ); 
                             jual.verifikasiPinOtorisasi( kode_faktur ); 
                         });
@@ -1431,6 +1440,13 @@ var jual = {
                         });
                         $(this).find('.btn-ok').click(function() { jual.modalPrint( kode_faktur ); });
 
+                        $(this).find('.btn-del-bayar').click(function() {
+                            var tr = $(this).closest('tr');
+                            var id = $(tr).attr('data-id');
+
+                            jual.verifikasiPinOtorisasi(kode_faktur, id);
+                        });
+
                         // $(this).find('tr.bayar td:not(.btn-delete)').click(function() {
                         //     var tr = $(this).closest('tr.bayar');
                         //     var kode_faktur = $(tr).find('td.kode_faktur').html();
@@ -1451,7 +1467,7 @@ var jual = {
         });
     }, // end - modalDetailFaktur
 
-    verifikasiPinOtorisasi: function(kode_faktur) {
+    verifikasiPinOtorisasi: function(kode_faktur, id_pembayaran = null) {
         bootbox.dialog({
             message: '<p>Masukkan PIN Otorisasi untuk menghapus data.</p><p><input type="password" class="form-control text-center pin" data-tipe="angka" placeholder="PIN" /></p>',
             buttons: {
@@ -1477,7 +1493,11 @@ var jual = {
                             success: function(data) {
                                 // hideLoading();
                                 if ( data.status == 1 ) {
-                                    jual.deletePenjualan(kode_faktur);
+                                    if ( empty(id_pembayaran) ) {
+                                        jual.deletePenjualan(kode_faktur);
+                                    } else {
+                                        jual.deletePembayaran(kode_faktur, id_pembayaran);
+                                    }
                                 } else {
                                     bootbox.alert(data.message, function() {
                                         jual.verifikasiPinOtorisasi(kode_faktur);
@@ -1519,12 +1539,43 @@ var jual = {
         });
         //     }
         // });
-    }, // end - savePembayaran
+    }, // end - deletePenjualan
+
+    deletePembayaran: function(kode_faktur, id_pembayaran) {
+        // bootbox.confirm('Apakah anda yakin ingin meng-hapus data penjualan <b>'+kode_faktur+'</b> ?', function(result) {
+        //     if ( result ) {
+        $.ajax({
+            url: 'transaksi/Penjualan/deletePembayaran',
+            data: {
+                'params': id_pembayaran
+            },
+            type: 'POST',
+            dataType: 'JSON',
+            beforeSend: function() { 
+                // showLoading();
+            },
+            success: function(data) {
+                hideLoading();
+                if ( data.status == 1 ) {
+                    bootbox.alert(data.message, function() {
+                        $('.modal').modal('hide');
+
+                        jual.modalDetailFaktur( kode_faktur );
+                    });
+                } else {
+                    bootbox.alert(data.message);
+                }
+            }
+        });
+        //     }
+        // });
+    }, // end - deletePembayaran
 
     openModalPembayaran: function(elm) {
         var tr = $(elm);
         kodeFaktur = $(tr).find('td.kode_faktur').text();
         gTotal = numeral.unformat($(tr).find('td.total').text());
+        gKurangBayar = gTotal;
 
         jual.modalPembayaran();
     }, // end - openModalPembayaran

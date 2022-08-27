@@ -21,45 +21,51 @@
 				<div class="col-md-12 text-center no-padding list_member" style="height: 92.5%; border-bottom: 1px solid #dddddd;">
 					<table class="table table-bordered" style="margin-bottom: 0px;">
 						<tbody>
-							<?php foreach ($data as $key => $value): ?>
-								<tr class="cursor-p header" onclick="jual.pilihDiskon(this)">
-									<td class="col-md-2 text-left kode"><?php echo $value['kode']; ?></td>
-									<td class="col-md-4 text-left nama"><?php echo $value['nama']; ?></td>
-									<td class="col-md-6 text-left"><?php echo $value['deskripsi']; ?></td>
-								</tr>
-								<tr class="detail" hidden="">
-									<td colspan="3">
-										<table class="table table-bordered" style="margin-bottom: 0px;">
-											<thead>
-												<tr>
-													<th class="col-md-2">Persen (%)</th>
-													<th class="col-md-2">Nilai (Rp)</th>
-													<th class="col-md-2">Member</th>
-													<th class="col-md-2">Min Beli</th>
-													<th class="col-md-2">Level</th>
-												</tr>
-											</thead>
-											<tbody>
-												<?php foreach ($value['detail'] as $k_det => $v_det): ?>
+							<?php if ( !empty($data) ): ?>
+								<?php foreach ($data as $key => $value): ?>
+									<tr class="cursor-p header" onclick="jual.pilihDiskon(this)">
+										<td class="col-md-2 text-left kode"><?php echo $value['kode']; ?></td>
+										<td class="col-md-4 text-left nama"><?php echo $value['nama']; ?></td>
+										<td class="col-md-6 text-left"><?php echo $value['deskripsi']; ?></td>
+									</tr>
+									<tr class="detail" hidden="">
+										<td colspan="3">
+											<table class="table table-bordered" style="margin-bottom: 0px;">
+												<thead>
 													<tr>
-														<td class="text-right persen"><?php echo angkaDecimal($v_det['persen']); ?></td>
-														<td class="text-right nilai"><?php echo angkaDecimal($v_det['nilai']); ?></td>
-														<td class="text-center member" data-nonmember="<?php echo $v_det['non_member']; ?>" data-member="<?php echo $v_det['member']; ?>">
-															<?php if ( $v_det['member'] == 1 ) : ?>
-																<i class="fa fa-check"></i>
-															<?php else : ?>
-																<i class="fa fa-minus"></i>
-															<?php endif ?>
-														</td>
-														<td class="text-right min_beli"><?php echo angkaDecimal($v_det['min_beli']); ?></td>
-														<td class="text-right level"><?php echo $value['level']; ?></td>
+														<th class="col-md-2">Persen (%)</th>
+														<th class="col-md-2">Nilai (Rp)</th>
+														<th class="col-md-2">Member</th>
+														<th class="col-md-2">Min Beli</th>
+														<th class="col-md-2">Level</th>
 													</tr>
-												<?php endforeach ?>
-											</tbody>
-										</table>
-									</td>
-								</tr>								
-							<?php endforeach ?>
+												</thead>
+												<tbody>
+													<?php foreach ($value['detail'] as $k_det => $v_det): ?>
+														<tr>
+															<td class="text-right persen"><?php echo angkaDecimal($v_det['persen']); ?></td>
+															<td class="text-right nilai"><?php echo angkaDecimal($v_det['nilai']); ?></td>
+															<td class="text-center member" data-nonmember="<?php echo $v_det['non_member']; ?>" data-member="<?php echo $v_det['member']; ?>">
+																<?php if ( $v_det['member'] == 1 ) : ?>
+																	<i class="fa fa-check"></i>
+																<?php else : ?>
+																	<i class="fa fa-minus"></i>
+																<?php endif ?>
+															</td>
+															<td class="text-right min_beli"><?php echo angkaDecimal($v_det['min_beli']); ?></td>
+															<td class="text-right level"><?php echo $value['level']; ?></td>
+														</tr>
+													<?php endforeach ?>
+												</tbody>
+											</table>
+										</td>
+									</tr>								
+								<?php endforeach ?>
+							<?php else: ?>
+								<tr>
+									<td colspan="3">Data tidak ditemukan.</td>
+								</tr>
+							<?php endif ?>
 						</tbody>
 					</table>
 				</div>

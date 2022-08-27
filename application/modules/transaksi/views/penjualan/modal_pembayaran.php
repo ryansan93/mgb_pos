@@ -25,6 +25,14 @@
 						<span style="font-size: 28px;"><b>Rp. <span class="gTotal">0,00</span></b></span>
 					</div>
 				</div>
+				<div class="col-md-12" style="height: 20%; display: flex; align-items: center; border: 1px solid #dedede; margin-bottom: 10px;">
+					<div class="col-md-4 no-padding text-left">
+						<span style="font-size: 28px;"><b>SISA TAGIHAN</b></span>
+					</div>
+					<div class="col-md-8 no-padding text-right">
+						<span style="font-size: 28px;"><b>Rp. <span class="gKurangBayar">0,00</span></b></span>
+					</div>
+				</div>
 				<div class="col-md-12 cursor-p bayar" style="height: 15%; display: flex; align-items: center; border: 1px solid #dedede; margin-bottom: 10px; background-color: #c7dfff;">
 					<div class="col-md-4 no-padding text-left">
 						<span style="font-size: 20px;"><b>BAYAR</b></span>
@@ -59,6 +67,14 @@
 					</div>
 					<div class="col-md-8 no-padding text-right">
 						<span style="font-size: 28px;"><b>Rp. <span class="gTotal">0,00</span></b></span>
+					</div>
+				</div>
+				<div class="col-md-12" style="height: 20%; display: flex; align-items: center; border: 1px solid #dedede; margin-bottom: 10px;">
+					<div class="col-md-4 no-padding text-left">
+						<span style="font-size: 28px;"><b>SISA TAGIHAN</b></span>
+					</div>
+					<div class="col-md-8 no-padding text-right">
+						<span style="font-size: 28px;"><b>Rp. <span class="gKurangBayar">0,00</span></b></span>
 					</div>
 				</div>
 				<div class="col-md-12 cursor-p jenis_kartu" style="height: 15%; display: flex; align-items: center; border: 1px solid #dedede; margin-bottom: 10px; background-color: #c7dfff;">

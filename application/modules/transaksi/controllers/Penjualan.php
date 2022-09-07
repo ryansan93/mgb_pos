@@ -1049,7 +1049,7 @@ class Penjualan extends Public_Controller
     {
         try {
             $today = date('Y-m-d');
-            // $today = '2022-08-21';
+            // $today = '2022-08-31';
 
             $start_date = $today.' 00:00:00';
             $end_date = $today.' 23:59:59';
@@ -1239,33 +1239,35 @@ class Penjualan extends Public_Controller
                 if ( !empty($v_jual['bayar']) ) {
                     foreach ($v_jual['bayar'] as $k_bayar => $v_bayar) {
                         if ( $v_jual['mstatus'] == 1 && $v_jual['lunas'] == 1 ) {
-                            if ( $v_bayar['jenis_bayar'] == 'tunai' ) {
-                                $key_bayar = $v_bayar['jenis_bayar'];
-                                if ( !isset( $data_detail_pembayaran['detail'][ $key_bayar ] ) ) {
-                                    $data_detail_pembayaran['detail'][ $key_bayar ] = array(
-                                        'nama' => 'TUNAI',
-                                        'bayar' => $v_bayar['jml_bayar'],
-                                        'tagihan' => $v_bayar['jml_tagihan'],
-                                        'kembalian' => $v_bayar['jml_bayar'] - $v_bayar['jml_tagihan']
-                                    );
+                            if ( $v_bayar['jml_tagihan'] <= $v_bayar['jml_bayar'] ) {
+                                if ( $v_bayar['jenis_bayar'] == 'tunai' ) {
+                                    $key_bayar = $v_bayar['jenis_bayar'];
+                                    if ( !isset( $data_detail_pembayaran['detail'][ $key_bayar ] ) ) {
+                                        $data_detail_pembayaran['detail'][ $key_bayar ] = array(
+                                            'nama' => 'TUNAI',
+                                            'bayar' => $v_bayar['jml_bayar'],
+                                            'tagihan' => $v_bayar['jml_tagihan'],
+                                            'kembalian' => $v_bayar['jml_bayar'] - $v_bayar['jml_tagihan']
+                                        );
+                                    } else {
+                                        $data_detail_pembayaran['detail'][ $key_bayar ]['bayar'] += $v_bayar['jml_bayar'];
+                                        $data_detail_pembayaran['detail'][ $key_bayar ]['tagihan'] += $v_bayar['jml_tagihan'];
+                                        $data_detail_pembayaran['detail'][ $key_bayar ]['kembalian'] += $v_bayar['jml_bayar'] - $v_bayar['jml_tagihan'];
+                                    }
                                 } else {
-                                    $data_detail_pembayaran['detail'][ $key_bayar ]['bayar'] += $v_bayar['jml_bayar'];
-                                    $data_detail_pembayaran['detail'][ $key_bayar ]['tagihan'] += $v_bayar['jml_tagihan'];
-                                    $data_detail_pembayaran['detail'][ $key_bayar ]['kembalian'] += $v_bayar['jml_bayar'] - $v_bayar['jml_tagihan'];
+                                    $key_bayar = $v_bayar['jenis_bayar'].' | '.$v_bayar['jenis_kartu_kode'];
+                                    if ( !isset( $data_detail_pembayaran['detail'][ $key_bayar ] ) ) {
+                                        $data_detail_pembayaran['detail'][ $key_bayar ] = array(
+                                            'nama' => $v_bayar['jenis_kartu']['nama'],
+                                            'bayar' => $v_bayar['jml_bayar']
+                                        );
+                                    } else {
+                                        $data_detail_pembayaran['detail'][ $key_bayar ]['bayar'] += $v_bayar['jml_bayar'];
+                                    }
                                 }
-                            } else {
-                                $key_bayar = $v_bayar['jenis_bayar'].' | '.$v_bayar['jenis_kartu_kode'];
-                                if ( !isset( $data_detail_pembayaran['detail'][ $key_bayar ] ) ) {
-                                    $data_detail_pembayaran['detail'][ $key_bayar ] = array(
-                                        'nama' => $v_bayar['jenis_kartu']['nama'],
-                                        'bayar' => $v_bayar['jml_bayar']
-                                    );
-                                } else {
-                                    $data_detail_pembayaran['detail'][ $key_bayar ]['bayar'] += $v_bayar['jml_bayar'];
-                                }
-                            }
 
-                            $data_detail_pembayaran['grand_total'] += $v_bayar['jml_tagihan'];
+                                $data_detail_pembayaran['grand_total'] += $v_bayar['jml_tagihan'];
+                            }
                         }
                     }
                 }

@@ -1049,13 +1049,16 @@ class Penjualan extends Public_Controller
     {
         try {
             $today = date('Y-m-d');
-            // $today = '2022-08-31';
+            // $today = '2022-09-15';
 
             $start_date = $today.' 00:00:00';
             $end_date = $today.' 23:59:59';
 
+            $kasir = $this->userid;
+            // $kasir = 'USR2207003';
+
             $m_jual = new \Model\Storage\Jual_model();
-            $d_jual = $m_jual->whereBetween('tgl_trans', [$start_date, $end_date])->where('kasir', $this->userid)->where('mstatus', 1)->with(['jual_item', 'jual_diskon', 'bayar'])->get();
+            $d_jual = $m_jual->whereBetween('tgl_trans', [$start_date, $end_date])->where('kasir', $kasir)->where('mstatus', 1)->with(['jual_item', 'jual_diskon', 'bayar'])->get();
 
             $data_bayar = ($d_jual->count() > 0) ? $this->getDataBayar($d_jual) : null;
             $data_belum_bayar = ($d_jual->count() > 0) ? $this->getDataBelumBayar($d_jual) : null;
@@ -1102,17 +1105,12 @@ class Penjualan extends Public_Controller
         $data = null;
         foreach ($_data as $k_data => $v_data) {
             if ( $v_data['lunas'] == 1 ) {
-                $stts_salah_bayar = false;
-                $salah_bayar = 0;
+                $total_bayar = 0;
+                $jml_bayar = 0;
                 if ( !empty($v_data['bayar']) ) {
                     foreach ($v_data['bayar'] as $k_bayar => $v_bayar) {
-                        if ( $v_bayar['jml_tagihan'] >= $v_bayar['jml_bayar'] ) {
-                            $stts_salah_bayar = true;
-                        } else {
-                            $stts_salah_bayar = false;
-                        }
-
-                        $salah_bayar += $v_bayar['jml_bayar'];
+                        $total_bayar += $v_bayar['jml_tagihan'];
+                        $jml_bayar++;
                     }
                 }
 
@@ -1120,7 +1118,9 @@ class Penjualan extends Public_Controller
                     'kode_faktur' => $v_data['kode_faktur'],
                     'pelanggan' => $v_data['member'],
                     'total' => $v_data['grand_total'],
-                    'salah_bayar' => ($stts_salah_bayar == true && $salah_bayar > 0) ? $salah_bayar - $v_data['grand_total'] : 0
+                    'total_bayar' => $total_bayar,
+                    'selisih_bayar' => ($total_bayar - $v_data['grand_total']),
+                    'jml_bayar' => $jml_bayar,
                 );
             }
         }
@@ -1208,6 +1208,9 @@ class Penjualan extends Public_Controller
 
     public function getDataClosingShift($tanggal, $kasir)
     {
+        // $tanggal = '2022-09-15';
+        // $kasir = 'USR2207003';
+
         $start_date = substr($tanggal, 0, 10).' 00:00:00';
         $end_date = substr($tanggal, 0, 10).' 23:59:59';
 
@@ -1274,7 +1277,7 @@ class Penjualan extends Public_Controller
 
                 foreach ($v_jual['jual_item'] as $k_ji => $v_ji) {
                     // LUNAS
-                    if ( $v_jual['mstatus'] == 1 && $v_jual['lunas'] == 1 ) {
+                    if ( $v_jual['mstatus'] == 1 ) {
                         if ( !isset($data_detail_transaksi['detail']['item_terjual']['detail'][ $v_ji['menu_kode'] ]) ) {
                             $data_detail_transaksi['detail']['item_terjual']['detail'][ $v_ji['menu_kode'] ] = array(
                                 'nama' => $v_ji['menu_nama'],
@@ -1617,7 +1620,11 @@ class Penjualan extends Public_Controller
 
     public function tes()
     {
-        // $data = $this->getDataNota( 'JBR1-2207190002' );
-        echo gethostbyaddr($_SERVER['REMOTE_ADDR']);
+        $kasir = 'USR2207003';
+        $date = '2022-09-12';
+
+        $data = $this->getDataClosingShift( $date, $kasir );
+
+        cetak_r($data);
     }
 }

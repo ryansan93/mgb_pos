@@ -71,7 +71,7 @@
 						</div>
 					</div>
 					<div id="bayar" class="tab-pane fade" role="tabpanel" style="padding-top: 10px;">
-						<?php $jml_transaksi = 0; $grand_total = 0; ?>
+						<?php $jml_transaksi = 0; $grand_total = 0; $jml_bayar = 0; $selisih_bayar= 0; ?>
 						<div class="col-lg-12 no-padding">
 							<div class="col-md-12 search left-inner-addon no-padding" style="margin-bottom: 10px;">
 								<i class="fa fa-search"></i><input class="form-control" type="search" data-table="tbl_bayar" placeholder="Search" onkeyup="filter_all(this)">
@@ -81,9 +81,10 @@
 									<thead>
 										<tr>
 											<th class="col-lg-2">No. Nota</th>
-											<th class="col-lg-4">Pelanggan</th>
+											<th class="col-lg-3">Pelanggan</th>
 											<th class="col-lg-2">Total</th>
-											<th class="col-lg-2">Salah Bayar</th>
+											<th class="col-lg-2">Total Bayar</th>
+											<th class="col-lg-2">Selisih Bayar</th>
 											<th class="col-lg-1">Delete</th>
 										</tr>
 									</thead>
@@ -94,13 +95,19 @@
 													<td class="kode_faktur"><?php echo $value['kode_faktur']; ?></td>
 													<td><?php echo $value['pelanggan']; ?></td>
 													<td class="text-right"><?php echo angkaDecimal($value['total']); ?></td>
-													<td class="text-right"><?php echo angkaDecimal($value['salah_bayar']); ?></td>
+													<td class="text-right"><?php echo angkaDecimal($value['total_bayar']); ?></td>
+													<td class="text-right"><?php echo angkaDecimal($value['selisih_bayar']); ?></td>
 													<td class="btn-delete text-center">
 														<button type="button" class="btn btn-danger" style="padding: 1px 0px; width: 100%;"><i class="fa fa-trash"></i></button
 															>
 													</td>
 												</tr>
-												<?php $jml_transaksi++; $grand_total += $value['total']; ?>
+												<?php 
+													$jml_transaksi++;
+													$grand_total += $value['total'];
+													$jml_bayar += $value['total_bayar'];
+													$selisih_bayar = $jml_bayar - $grand_total;
+												?>
 											<?php endforeach ?>
 										<?php else: ?>
 											<tr>
@@ -122,6 +129,16 @@
 								<label class="col-lg-3 no-padding">Total Transaksi</label>
 								<label class="col-lg-1">:</label>
 								<label class="col-lg-8"><?php echo angkaDecimal($grand_total); ?></label>
+							</div>
+							<div class="col-lg-12 no-padding">
+								<label class="col-lg-3 no-padding">Total Bayar</label>
+								<label class="col-lg-1">:</label>
+								<label class="col-lg-8"><?php echo angkaDecimal($jml_bayar); ?></label>
+							</div>
+							<div class="col-lg-12 no-padding">
+								<label class="col-lg-3 no-padding">Selisih Bayar</label>
+								<label class="col-lg-1">:</label>
+								<label class="col-lg-8"><?php echo angkaDecimal($selisih_bayar); ?></label>
 							</div>
 						</div>
 					</div>

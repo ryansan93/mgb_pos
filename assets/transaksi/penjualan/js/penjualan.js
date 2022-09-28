@@ -1003,8 +1003,6 @@ var jual = {
                 var _gKembali = gBayar - gKurangBayar;
                 var gKembali = (_gKembali > 0) ? _gKembali : 0;
 
-                console.log( gKurangBayar );
-
                 $(modal_body).find('.gTotal').text( numeral.formatDec(gTotal) );
                 $(modal_body).find('.gKurangBayar').text( numeral.formatDec(gKurangBayar) );
                 $(modal_body).find('.gBayar').text( numeral.formatDec(gBayar) );
@@ -1239,6 +1237,13 @@ var jual = {
                     if ( data.status == 1 ) {
                         // jual.printNota(JSON.stringify(data.content.data));
                         jual.modalPrint(kodeFaktur);
+
+                        gTotal = 0;
+                        gKurangBayar = 0;
+                        gBayar = 0;
+                        jenis_bayar = null;
+                        kodeKartu = null;
+                        noBukti = null;
                     } else {
                         bootbox.alert(data.message);
                     }

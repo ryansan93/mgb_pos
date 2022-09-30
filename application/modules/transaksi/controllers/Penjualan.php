@@ -5,7 +5,7 @@ class Penjualan extends Public_Controller
     private $pathView = 'transaksi/penjualan/';
     private $url;
     private $hakAkses;
-    private $persen_ppn = 0;
+    private $persen_ppn = (date('Y-m-d') >= '2022-09-31') ? 10 : 0;
     /**
      * Constructor
      */

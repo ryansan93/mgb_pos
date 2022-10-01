@@ -756,7 +756,7 @@ var jual = {
         });
 
         var persen_ppn = numeral.unformat($('.persen_ppn').text());
-        var total_ppn = (persen_ppn > 0) ? sub_total * (11/100) : 0;
+        var total_ppn = (persen_ppn > 0) ? sub_total * (persen_ppn/100) : 0;
 
         $('.subtotal').text(numeral.formatDec(sub_total));
         $('.ppn').text(numeral.formatDec(total_ppn));

@@ -5,7 +5,7 @@ class Penjualan extends Public_Controller
     private $pathView = 'transaksi/penjualan/';
     private $url;
     private $hakAkses;
-    private $persen_ppn = (date('Y-m-d') >= '2022-09-31') ? 10 : 0;
+    private $persen_ppn;
     /**
      * Constructor
      */
@@ -41,6 +41,8 @@ class Penjualan extends Public_Controller
                 )
             );
             $data = $this->includes;
+
+            $this->persen_ppn = (date('Y-m-d') >= '2022-09-30') ? 10 : 0;
 
             $isMobile = true;
             if ( $detect->isMobile() ) {

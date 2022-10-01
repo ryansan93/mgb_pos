@@ -696,6 +696,8 @@ class Penjualan extends Public_Controller
             $printer -> text("$lineTotal\n");
             // $lineTotal = sprintf('%18s %13.40s','PPN (11%).','=', angkaDecimal($data['ppn']));
             // $printer -> text("$lineTotal\n");
+            $linePpn = sprintf('%18s %13.40s','PPN ('.$this->persen_ppn.'%). =', '('.angkaDecimal($data['ppn']).')');
+            $printer -> text("$linePpn\n");
             $lineDisc = sprintf('%18s %13.40s','Disc. =', '('.angkaDecimal($data['diskon']).')');
             $printer -> text("$lineDisc\n");
             $lineTotal = sprintf('%18s %13.40s','Total Bayar. =', angkaDecimal($data['grand_total']));
@@ -821,6 +823,8 @@ class Penjualan extends Public_Controller
             $printer -> text("$lineTotal\n");
             // $lineTotal = sprintf('%46s %13.40s','PPN (11%).','=', angkaDecimal($data['ppn']));
             // $printer -> text("$lineTotal\n");
+            $lineDisc = sprintf('%46s %13.40s','PPN ('.$this->persen_ppn.'%). =', '('.angkaDecimal($data['ppn']).')');
+            $printer -> text("$lineDisc\n");
             $lineDisc = sprintf('%46s %13.40s','Disc. =', '('.angkaDecimal($data['diskon']).')');
             $printer -> text("$lineDisc\n");
             $lineTotal = sprintf('%46s %13.40s','Total Bayar. =', angkaDecimal($data['grand_total']));

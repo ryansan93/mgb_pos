@@ -189,7 +189,8 @@ class Penjualan extends Public_Controller
                         menu.kode_menu = pm.menu_kode
                 where
                     menu.kategori_menu_id = ".$id_kategori." and
-                    hm.jenis_pesanan_kode = '".$jenis_pesanan."'
+                    hm.jenis_pesanan_kode = '".$jenis_pesanan."' and
+                    menu.status = 1
             group by menu.id, menu.kode_menu, menu.nama, menu.deskripsi, hm.harga, menu.kategori_menu_id, hm.jenis_pesanan_kode
             order by menu.nama asc
         ";

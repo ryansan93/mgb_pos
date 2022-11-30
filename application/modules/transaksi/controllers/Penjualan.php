@@ -5,7 +5,7 @@ class Penjualan extends Public_Controller
     private $pathView = 'transaksi/penjualan/';
     private $url;
     private $hakAkses;
-    private $persen_ppn;
+    // private $persen_ppn;
     /**
      * Constructor
      */
@@ -42,7 +42,12 @@ class Penjualan extends Public_Controller
             );
             $data = $this->includes;
 
-            $this->persen_ppn = (date('Y-m-d') >= '2022-09-30') ? 10 : 0;
+            $persen_ppn = 0;
+            if ( date('Y-m-d') < '2022-12-01' ) {
+                $persen_ppn = (date('Y-m-d') >= '2022-09-30') ? 10 : 0;
+            } else {
+                $persen_ppn = $this->getPpn( $this->kodebranch );
+            }
 
             $isMobile = true;
             if ( $detect->isMobile() ) {
@@ -51,7 +56,7 @@ class Penjualan extends Public_Controller
 
             $content['akses'] = $this->hasAkses;
             $content['isMobile'] = $isMobile;
-            $content['persen_ppn'] = $this->persen_ppn;
+            $content['persen_ppn'] = $persen_ppn;
 
             $content['kategori'] = $this->getKategori();
 
@@ -61,6 +66,21 @@ class Penjualan extends Public_Controller
         // } else {
         //     showErrorAkses();
         // }
+    }
+
+    public function getPpn( $kodeBranch )
+    {
+        $today = date('Y-m-d');
+
+        $m_ppn = new \Model\Storage\Ppn_model();
+        $d_ppn = $m_ppn->where('branch_kode', $kodeBranch)->where('tgl_berlaku', '<=', $today)->where('mstatus', 1)->first();
+
+        $ppn = 0;
+        if ( $d_ppn ) {
+            $ppn = $d_ppn->nilai;
+        }
+
+        return $ppn;
     }
 
     public function getJenisPesanan()
@@ -632,6 +652,13 @@ class Penjualan extends Public_Controller
             // $computer_name = gethostbyaddr($_SERVER['REMOTE_ADDR']);
             // $connector = new Mike42\Escpos\PrintConnectors\WindowsPrintConnector('smb://'.$computer_name.'/kasir');
 
+            $persen_ppn = 0;
+            if ( date('Y-m-d') < '2022-12-01' ) {
+                $persen_ppn = (date('Y-m-d') >= '2022-09-30') ? 10 : 0;
+            } else {
+                $persen_ppn = $this->getPpn( $this->kodebranch );
+            }
+
             /* Print a receipt */
             $printer = new Mike42\Escpos\Printer($connector);
             $printer -> initialize();
@@ -697,7 +724,7 @@ class Penjualan extends Public_Controller
             $printer -> text("$lineTotal\n");
             // $lineTotal = sprintf('%18s %13.40s','PPN (11%).','=', angkaDecimal($data['ppn']));
             // $printer -> text("$lineTotal\n");
-            $linePpn = sprintf('%18s %13.40s','PPN ('.$this->persen_ppn.'%). =', '('.angkaDecimal($data['ppn']).')');
+            $linePpn = sprintf('%18s %13.40s','PPN ('.$persen_ppn.'%). =', '('.angkaDecimal($data['ppn']).')');
             $printer -> text("$linePpn\n");
             $lineDisc = sprintf('%18s %13.40s','Disc. =', '('.angkaDecimal($data['diskon']).')');
             $printer -> text("$lineDisc\n");
@@ -765,6 +792,13 @@ class Penjualan extends Public_Controller
             // $computer_name = gethostbyaddr($_SERVER['REMOTE_ADDR']);
             // $connector = new Mike42\Escpos\PrintConnectors\WindowsPrintConnector('smb://'.$computer_name.'/kasir');
 
+            $persen_ppn = 0;
+            if ( date('Y-m-d') < '2022-12-01' ) {
+                $persen_ppn = (date('Y-m-d') >= '2022-09-30') ? 10 : 0;
+            } else {
+                $persen_ppn = $this->getPpn( $this->kodebranch );
+            }
+
             /* Print a receipt */
             $printer = new Mike42\Escpos\Printer($connector);
             $printer -> initialize();
@@ -824,7 +858,7 @@ class Penjualan extends Public_Controller
             $printer -> text("$lineTotal\n");
             // $lineTotal = sprintf('%46s %13.40s','PPN (11%).','=', angkaDecimal($data['ppn']));
             // $printer -> text("$lineTotal\n");
-            $linePpn = sprintf('%46s %13.40s','PPN ('.$this->persen_ppn.'%). =', '('.angkaDecimal($data['ppn']).')');
+            $linePpn = sprintf('%46s %13.40s','PPN ('.$persen_ppn.'%). =', '('.angkaDecimal($data['ppn']).')');
             $printer -> text("$linePpn\n");
             $lineDisc = sprintf('%46s %13.40s','Disc. =', '('.angkaDecimal($data['diskon']).')');
             $printer -> text("$lineDisc\n");
@@ -1627,8 +1661,8 @@ class Penjualan extends Public_Controller
 
     public function tes()
     {
-        $kasir = 'USR2207003';
-        $date = '2022-09-12';
+        $kasir = 'USR2208012';
+        $date = '2022-11-27';
 
         $data = $this->getDataClosingShift( $date, $kasir );
 

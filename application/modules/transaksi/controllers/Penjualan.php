@@ -199,7 +199,7 @@ class Penjualan extends Public_Controller
                 left join
                     (
                     select * from harga_menu where id in (
-                        select max(id) as id from harga_menu group by jenis_pesanan_kode, menu_kode
+                        select max(id) as id from harga_menu where status = 1 group by jenis_pesanan_kode, menu_kode
                     )) hm 
                     on
                         menu.kode_menu = hm.menu_kode 

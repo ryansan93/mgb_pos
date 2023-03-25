@@ -1089,10 +1089,13 @@ class Penjualan extends Public_Controller
     public function modalListBayar()
     {
         try {
-            $today = date('Y-m-d');
+            $m_conf = new \Model\Storage\Conf();
+            $now = $m_conf->getDate();
+            $today = $now['tanggal'];
+            // $today = date('Y-m-d');
             // $today = '2022-09-15';
 
-            $start_date = $today.' 00:00:00';
+            $start_date = prevDate($today).' 00:00:00';
             $end_date = $today.' 23:59:59';
 
             $kasir = $this->userid;
@@ -1285,28 +1288,30 @@ class Penjualan extends Public_Controller
                         if ( $v_jual['mstatus'] == 1 && $v_jual['lunas'] == 1 ) {
                             if ( $v_bayar['jml_tagihan'] <= $v_bayar['jml_bayar'] ) {
                                 if ( $v_bayar['jenis_bayar'] == 'tunai' ) {
+                                    $urut = 0;
                                     $key_bayar = $v_bayar['jenis_bayar'];
-                                    if ( !isset( $data_detail_pembayaran['detail'][ $key_bayar ] ) ) {
-                                        $data_detail_pembayaran['detail'][ $key_bayar ] = array(
+                                    if ( !isset( $data_detail_pembayaran['detail'][ $urut ][ $key_bayar ] ) ) {
+                                        $data_detail_pembayaran['detail'][ $urut ][ $key_bayar ] = array(
                                             'nama' => 'TUNAI',
                                             'bayar' => $v_bayar['jml_bayar'],
                                             'tagihan' => $v_bayar['jml_tagihan'],
                                             'kembalian' => $v_bayar['jml_bayar'] - $v_bayar['jml_tagihan']
                                         );
                                     } else {
-                                        $data_detail_pembayaran['detail'][ $key_bayar ]['bayar'] += $v_bayar['jml_bayar'];
-                                        $data_detail_pembayaran['detail'][ $key_bayar ]['tagihan'] += $v_bayar['jml_tagihan'];
-                                        $data_detail_pembayaran['detail'][ $key_bayar ]['kembalian'] += $v_bayar['jml_bayar'] - $v_bayar['jml_tagihan'];
+                                        $data_detail_pembayaran['detail'][ $urut ][ $key_bayar ]['bayar'] += $v_bayar['jml_bayar'];
+                                        $data_detail_pembayaran['detail'][ $urut ][ $key_bayar ]['tagihan'] += $v_bayar['jml_tagihan'];
+                                        $data_detail_pembayaran['detail'][ $urut ][ $key_bayar ]['kembalian'] += $v_bayar['jml_bayar'] - $v_bayar['jml_tagihan'];
                                     }
                                 } else {
+                                    $urut = $v_bayar['jenis_kartu']['urut'];
                                     $key_bayar = $v_bayar['jenis_bayar'].' | '.$v_bayar['jenis_kartu_kode'];
-                                    if ( !isset( $data_detail_pembayaran['detail'][ $key_bayar ] ) ) {
-                                        $data_detail_pembayaran['detail'][ $key_bayar ] = array(
+                                    if ( !isset( $data_detail_pembayaran['detail'][ $urut ][ $key_bayar ] ) ) {
+                                        $data_detail_pembayaran['detail'][ $urut ][ $key_bayar ] = array(
                                             'nama' => $v_bayar['jenis_kartu']['nama'],
                                             'bayar' => $v_bayar['jml_bayar']
                                         );
                                     } else {
-                                        $data_detail_pembayaran['detail'][ $key_bayar ]['bayar'] += $v_bayar['jml_bayar'];
+                                        $data_detail_pembayaran['detail'][ $urut ][ $key_bayar ]['bayar'] += $v_bayar['jml_bayar'];
                                     }
                                 }
 
@@ -1314,6 +1319,8 @@ class Penjualan extends Public_Controller
                             }
                         }
                     }
+
+                    ksort( $data_detail_pembayaran['detail'] );
                 }
 
                 foreach ($v_jual['jual_item'] as $k_ji => $v_ji) {
@@ -1480,27 +1487,29 @@ class Penjualan extends Public_Controller
             $printer -> textRaw("================================\n");
 
             foreach ($data['detail_pembayaran']['detail'] as $k_dp => $v_dp) {
-                $printer -> setJustification(0);
-                $printer -> selectPrintMode(1);
-                if ( stristr($k_dp, 'tunai') !== FALSE ) {
-                    // $printer -> textRaw(strtoupper($v_dp['nama'])."\n");
+                foreach ($v_dp as $k_urut => $v_urut) {
+                    $printer -> setJustification(0);
+                    $printer -> selectPrintMode(1);
+                    if ( stristr($k_dp, 'tunai') !== FALSE ) {
+                        // $printer -> textRaw(strtoupper($v_dp['nama'])."\n");
 
-                    // if ( isset($v_dp) ) {
-                    //     foreach ($v_dp as $k_det => $v_det) {
-                    //         if ( stristr($k_det, 'nama') === FALSE ) {
-                    //             $line = sprintf('%-28s %13.40s', strtoupper($k_det), angkaDecimal($v_det));
-                    //             $printer -> text("$line\n");
-                    //         }
-                    //     }
-                    // }
-                    $line = sprintf('%-28s %13.40s', strtoupper($v_dp['nama']), angkaDecimal($v_dp['tagihan']));
-                    $printer -> text("$line\n");
-                } else {
-                    $line = sprintf('%-28s %13.40s', strtoupper($v_dp['nama']), angkaDecimal($v_dp['bayar']));
-                    $printer -> text("$line\n");
+                        // if ( isset($v_dp) ) {
+                        //     foreach ($v_dp as $k_det => $v_det) {
+                        //         if ( stristr($k_det, 'nama') === FALSE ) {
+                        //             $line = sprintf('%-28s %13.40s', strtoupper($k_det), angkaDecimal($v_det));
+                        //             $printer -> text("$line\n");
+                        //         }
+                        //     }
+                        // }
+                        $line = sprintf('%-28s %13.40s', strtoupper($v_urut['nama']), angkaDecimal($v_urut['tagihan']));
+                        $printer -> text("$line\n");
+                    } else {
+                        $line = sprintf('%-28s %13.40s', strtoupper($v_urut['nama']), angkaDecimal($v_urut['bayar']));
+                        $printer -> text("$line\n");
+                    }
+
+                    $printer -> textRaw("\n");
                 }
-
-                $printer -> textRaw("\n");
             }
 
             $printer = new Mike42\Escpos\Printer($connector);
@@ -1614,27 +1623,29 @@ class Penjualan extends Public_Controller
             $printer -> textRaw("==========================================\n");
 
             foreach ($data['detail_pembayaran']['detail'] as $k_dp => $v_dp) {
-                $printer -> setJustification(0);
-                $printer -> selectPrintMode(1);
-                if ( stristr($k_dp, 'tunai') !== FALSE ) {
-                    // $printer -> textRaw(strtoupper($v_dp['nama'])."\n");
+                foreach ($v_dp as $k_urut => $v_urut) {
+                    $printer -> setJustification(0);
+                    $printer -> selectPrintMode(1);
+                    if ( stristr($k_dp, 'tunai') !== FALSE ) {
+                        // $printer -> textRaw(strtoupper($v_dp['nama'])."\n");
 
-                    // if ( isset($v_dp) ) {
-                    //     foreach ($v_dp as $k_det => $v_det) {
-                    //         if ( stristr($k_det, 'nama') === FALSE ) {
-                    //             $line = sprintf('%-28s %13.40s', strtoupper($k_det), angkaDecimal($v_det));
-                    //             $printer -> text("$line\n");
-                    //         }
-                    //     }
-                    // }
-                    $line = sprintf('%-46s %13.40s', strtoupper($v_dp['nama']), angkaDecimal($v_dp['tagihan']));
-                    $printer -> text("$line\n");
-                } else {
-                    $line = sprintf('%-46s %13.40s', strtoupper($v_dp['nama']), angkaDecimal($v_dp['bayar']));
-                    $printer -> text("$line\n");
+                        // if ( isset($v_dp) ) {
+                        //     foreach ($v_dp as $k_det => $v_det) {
+                        //         if ( stristr($k_det, 'nama') === FALSE ) {
+                        //             $line = sprintf('%-28s %13.40s', strtoupper($k_det), angkaDecimal($v_det));
+                        //             $printer -> text("$line\n");
+                        //         }
+                        //     }
+                        // }
+                        $line = sprintf('%-46s %13.40s', strtoupper($v_urut['nama']), angkaDecimal($v_urut['tagihan']));
+                        $printer -> text("$line\n");
+                    } else {
+                        $line = sprintf('%-46s %13.40s', strtoupper($v_urut['nama']), angkaDecimal($v_urut['bayar']));
+                        $printer -> text("$line\n");
+                    }
+
+                    $printer -> textRaw("\n");
                 }
-
-                $printer -> textRaw("\n");
             }
 
             $printer = new Mike42\Escpos\Printer($connector);
@@ -1662,7 +1673,7 @@ class Penjualan extends Public_Controller
     public function tes()
     {
         $kasir = 'USR2208012';
-        $date = '2022-11-27';
+        $date = '2022-12-12';
 
         $data = $this->getDataClosingShift( $date, $kasir );
 

@@ -1095,7 +1095,7 @@ class Penjualan extends Public_Controller
             // $today = date('Y-m-d');
             // $today = '2022-09-15';
 
-            $start_date = prevDate($today).' 00:00:00';
+            $start_date = prev_date($today).' 00:00:00';
             $end_date = $today.' 23:59:59';
 
             $kasir = $this->userid;

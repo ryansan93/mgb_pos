@@ -1540,8 +1540,8 @@ class Penjualan extends Public_Controller
             $conf = new \Model\Storage\Conf();
             $now = $conf->getDate();
 
-            // $data = $this->getDataClosingShift( $now['tanggal'], $this->userid );
-            $data = $this->getDataClosingShift( '2023-03-25', 'USR2301001' );
+            $data = $this->getDataClosingShift( $now['tanggal'], $this->userid );
+            // $data = $this->getDataClosingShift( '2023-03-25', 'USR2301001' );
 
             $nama_user = $this->userdata['detail_user']['nama_detuser'];
 

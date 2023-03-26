@@ -1401,12 +1401,12 @@ class Penjualan extends Public_Controller
     public function printClosingShift58()
     {
         try {
-            $data = $this->getDataClosingShift( date('Y-m-d'), $this->userid );
-
-            $nama_user = $this->userdata['detail_user']['nama_detuser'];
-
             $conf = new \Model\Storage\Conf();
             $now = $conf->getDate();
+
+            $data = $this->getDataClosingShift( $now['tanggal'], $this->userid );
+
+            $nama_user = $this->userdata['detail_user']['nama_detuser'];
 
             // Enter the share name for your USB printer here
             $connector = new Mike42\Escpos\PrintConnectors\WindowsPrintConnector('kasir');
@@ -1537,12 +1537,12 @@ class Penjualan extends Public_Controller
     public function printClosingShift80()
     {
         try {
-            $data = $this->getDataClosingShift( date('Y-m-d'), $this->userid );
-
-            $nama_user = $this->userdata['detail_user']['nama_detuser'];
-
             $conf = new \Model\Storage\Conf();
             $now = $conf->getDate();
+
+            $data = $this->getDataClosingShift( $now['tanggal'], $this->userid );
+
+            $nama_user = $this->userdata['detail_user']['nama_detuser'];
 
             // Enter the share name for your USB printer here
             $connector = new Mike42\Escpos\PrintConnectors\WindowsPrintConnector('kasir');

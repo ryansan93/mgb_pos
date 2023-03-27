@@ -1630,9 +1630,11 @@ var jual = {
             data: {},
             type: 'POST',
             dataType: 'JSON',
-            beforeSend: function() { showLoading('Saving Closing Shift . . .'); },
+            beforeSend: function() { 
+                // showLoading('Saving Closing Shift . . .'); 
+            },
             success: function(data) {
-                hideLoading();
+                // hideLoading();
                 if ( data.status != 1 ) {
                     bootbox.alert(data.message);
                 }

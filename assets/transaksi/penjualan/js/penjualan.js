@@ -1615,12 +1615,30 @@ var jual = {
             dataType: 'JSON',
             beforeSend: function() {},
             success: function(data) {
+                if ( data.status == 1 ) {
+                    jual.saveClosingShift();
+                } else {
+                    bootbox.alert(data.message);
+                } 
+            }
+        });
+    }, // end - printNota
+
+    saveClosingShift: function() {
+        $.ajax({
+            url: 'transaksi/Penjualan/saveClosingShift',
+            data: {},
+            type: 'POST',
+            dataType: 'JSON',
+            beforeSend: function() { showLoading('Saving Closing Shift . . .'); },
+            success: function(data) {
+                hideLoading();
                 if ( data.status != 1 ) {
                     bootbox.alert(data.message);
                 }
             }
         });
-    }, // end - printNota
+    }, // end - saveClosingShift
 };
 
 jual.start_up();

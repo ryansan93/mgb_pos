@@ -1095,11 +1095,22 @@ class Penjualan extends Public_Controller
             // $today = date('Y-m-d');
             // $today = '2022-09-15';
 
-            $start_date = prev_date($today).' 00:00:00';
-            $end_date = $today.' 23:59:59';
-
             $kasir = $this->userid;
             // $kasir = 'USR2207003';
+
+            $m_cs = new \Model\Storage\ClosingShift_model();
+            $d_cs = $m_cs->where('user_id', $kasir)->orderBy('tanggal', 'desc')->first();
+
+            $start_date = substr($today, 0, 10).' 00:00:00';
+            if ( $d_cs ) {
+                $d_cs_prev = $m_cs->where('user_id', $kasir)->where('tanggal', '<', $d_cs->tanggal)->orderBy('tanggal', 'desc')->first();
+                if ( $d_cs_prev ) {
+                    $start_date = substr($d_cs_prev->tanggal, 0, 19);
+                }
+            }
+
+            // $start_date = prev_date($today).' 00:00:00';
+            $end_date = $today.' 23:59:59';
 
             $m_jual = new \Model\Storage\Jual_model();
             $d_jual = $m_jual->whereBetween('tgl_trans', [$start_date, $end_date])->where('kasir', $kasir)->where('mstatus', 1)->with(['jual_item', 'jual_diskon', 'bayar'])->get();
@@ -1255,7 +1266,14 @@ class Penjualan extends Public_Controller
         // $tanggal = '2022-09-15';
         // $kasir = 'USR2207003';
 
+        $m_cs = new \Model\Storage\ClosingShift_model();
+        $d_cs = $m_cs->where('user_id', $kasir)->orderBy('tanggal', 'desc')->first();
+
         $start_date = substr($tanggal, 0, 10).' 00:00:00';
+        if ( $d_cs ) {
+            $start_date = substr($d_cs->tanggal, 0, 19);
+        }
+
         $end_date = substr($tanggal, 0, 10).' 23:59:59';
 
         $m_jual = new \Model\Storage\Jual_model();
@@ -1320,7 +1338,9 @@ class Penjualan extends Public_Controller
                         }
                     }
 
-                    ksort( $data_detail_pembayaran['detail'] );
+                    if ( isset($data_detail_pembayaran['detail']) ) {
+                        ksort( $data_detail_pembayaran['detail'] );
+                    }
                 }
 
                 foreach ($v_jual['jual_item'] as $k_ji => $v_ji) {
@@ -1540,6 +1560,8 @@ class Penjualan extends Public_Controller
             $conf = new \Model\Storage\Conf();
             $now = $conf->getDate();
 
+            $waktu = $now['waktu'];
+
             $data = $this->getDataClosingShift( $now['tanggal'], $this->userid );
             // $data = $this->getDataClosingShift( '2023-03-25', 'USR2301001' );
 
@@ -1562,7 +1584,7 @@ class Penjualan extends Public_Controller
             $printer -> selectPrintMode(1);
             $lineNoTransaksi = sprintf('%-13s %1.05s %-15s','Kasir',':', $nama_user);
             $printer -> text("$lineNoTransaksi\n");
-            $lineKasir = sprintf('%-13s %1.05s %-15s','Tanggal',':', $now['waktu']);
+            $lineKasir = sprintf('%-13s %1.05s %-15s','Tanggal',':', $waktu);
             $printer -> text("$lineKasir\n");
 
             $printer = new Mike42\Escpos\Printer($connector);
@@ -1677,6 +1699,24 @@ class Penjualan extends Public_Controller
         }
 
         return $this->result;
+    }
+
+    public function saveClosingShift()
+    {
+        try {
+            $m_cs = new \Model\Storage\ClosingShift_model();
+            $now = $m_cs->getDate();
+
+            $m_cs->tanggal = $now['waktu'];
+            $m_cs->user_id = $this->userid;
+            $m_cs->save();
+
+            $this->result['status'] = 1;
+        } catch (Exception $e) {
+            $this->result['message'] = $e -> getMessage();
+        }
+
+        display_json( $this->result );
     }
 
     public function tes()

@@ -15,9 +15,11 @@
 	<div class="row">
 		<div class="col-xs-12"><hr style="margin-top: 10px; margin-bottom: 10px;"></div>
 	</div>
-	<div class="row">
-		<div class="col-xs-12">
-			<button type="button" class="btn btn-primary" onclick="window.open('transaksi/ListShift', 'blank')"><i class="fa fa-list"></i> List Shift</button>
+	<?php if ( hasAkses('transaksi/ListShift') ): ?>
+		<div class="row">
+			<div class="col-xs-12">
+				<button type="button" class="btn btn-primary" onclick="window.open('transaksi/ListShift', 'blank')"><i class="fa fa-list"></i> List Shift</button>
+			</div>
 		</div>
-	</div>
+	<?php endif ?>
 </div>

@@ -529,11 +529,12 @@ if(!function_exists('next_date')){
   }
 }
 
-
 if (! function_exists ( 'hasAkses' )) {
-	function hasAkses($route) {
+  function hasAkses($route) {
         $CI = & get_instance();
+
         $permission = json_decode($CI->session->userdata('url'),1);
+
         foreach ($permission as $value) {
             if($value == $route){
                 return true;
@@ -541,8 +542,22 @@ if (! function_exists ( 'hasAkses' )) {
             }
         }
         return false;
-	}
+  }
 }
+
+// if (! function_exists ( 'hasAkses' )) {
+// 	function hasAkses($route) {
+//         $CI = & get_instance();
+//         $permission = json_decode($CI->session->userdata('url'),1);
+//         foreach ($permission as $value) {
+//             if($value == $route){
+//                 return true;
+//                 break;
+//             }
+//         }
+//         return false;
+// 	}
+// }
 
 if (! function_exists ( 'hakAkses' )) {
     function hakAkses($url) {

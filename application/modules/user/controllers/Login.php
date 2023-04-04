@@ -39,6 +39,8 @@ class Login extends MY_Controller
 					$m_group = new \Model\Storage\Group_model();
 					$group = $m_group->where('id_group', $user['detail_user']['id_group'])->with(['detail_group'])->get()->first();
 
+					$listUrl = \Model\Storage\DetGroup_model::whereIdGroup($user['detail_user']['id_group'])->with('detail_fitur')->get()->lists('detail_fitur.path_detfitur');
+
 					$fitur = array();
 					if ( $group ) {
 						$group = $group->toArray();
@@ -128,6 +130,7 @@ class Login extends MY_Controller
 						}
 
 						$this->session->set_userdata($dataUser);
+						$this->session->set_userdata('url',json_encode($listUrl));
 						
 						$this->result['status'] = 1;
 					} else {

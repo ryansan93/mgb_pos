@@ -1168,7 +1168,10 @@ class Home extends Public_Controller
 
 	public function updateAplikasi() {
 		try {
-			shell_exec("cd c:/xampp_php7/htdocs/mgb_pos git pull https://ryansan93:Mgb654321@github.com/ryansan93/mgb_pos.git");
+			$output = null;
+			shell_exec("cd c:/xampp_php7/htdocs/mgb_pos git pull https://ryansan93:Mgb654321@github.com/ryansan93/mgb_pos.git", $output);
+
+			cetak_r( $output );
 
 			$this->result['status'] = 1;
 			$this->result['message'] = 'Aplikasi berhasil di update.';

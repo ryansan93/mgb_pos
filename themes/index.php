@@ -194,12 +194,12 @@
                     Setting
                   </li>
                   <div class="dropdown-divider no-padding"></div>
-                  <li class="dropdown-item">
+                  <!-- <li class="dropdown-item">
                     <a class="cursor-p" onclick="updateAplikasi()">
                       <i class="fa fa-cog m-r-5 m-l-5"></i>
                       &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Update Aplikasi
                     </a>
-                  </li>
+                  </li> -->
                   <li class="dropdown-item">
                     <a class="cursor-p" onclick="modalHelp()">
                       <i class="fa fa-cog m-r-5 m-l-5"></i>

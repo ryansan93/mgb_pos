@@ -10,7 +10,7 @@
   <meta name="author" content="Dashboard">
   <meta name="keyword" content="Dashboard, Bootstrap, Admin, Template, Theme, Responsive, Fluid, Retina">
 
-  <title><?php echo $this->config->item('judul_aplikasi'); ?></title>
+  <title>COBA</title>
 
   <?php // CSS files ?>
   <?php if (isset($css_files) && is_array($css_files)) : ?>

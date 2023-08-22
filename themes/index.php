@@ -373,7 +373,7 @@
           success: function(data) {
               if ( data.status == 1 ) {
                   bootbox.alert(data.message, function(){
-                    window.reload();
+                    location.reload();
                   });
               } else {
                   bootbox.alert(data.message);

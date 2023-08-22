@@ -194,12 +194,16 @@ class Penjualan extends Public_Controller
         $jenis_pesanan = $this->input->get('jenis_pesanan');
 
         $m_menu = new \Model\Storage\Menu_model();
+        $now = $m_menu->getDate();
+
+        $today = $now['tanggal'];
+
         $sql = "
             select menu.id, menu.kode_menu, menu.nama, menu.deskripsi, hm.harga as harga_jual, menu.kategori_menu_id, count(pm.kode_paket_menu) as jml_paket from menu menu
                 left join
                     (
                     select * from harga_menu where id in (
-                        select max(id) as id from harga_menu where status = 1 group by jenis_pesanan_kode, menu_kode
+                        select max(id) as id from harga_menu where status = 1 and tgl_mulai <= '".$today."' group by jenis_pesanan_kode, menu_kode
                     )) hm 
                     on
                         menu.kode_menu = hm.menu_kode 
@@ -1410,6 +1414,13 @@ class Penjualan extends Public_Controller
 
     public function printClosingShift()
     {
+        $m_cs = new \Model\Storage\ClosingShift_model();
+        $now = $m_cs->getDate();
+
+        $m_cs->tanggal = $now['waktu'];
+        $m_cs->user_id = $this->userid;
+        $m_cs->save();
+
         if ( $this->config->item('paper_size') == '58' ) {
             $result = $this->printClosingShift58();
         } else {

@@ -203,7 +203,6 @@ class Home extends Public_Controller
 			}
 		}
 
-
 		/* INJEK ORDER DOC */
 		// $_data_header = null;
 		// foreach ($sheet_collection as $sheet) {
@@ -1165,5 +1164,18 @@ class Home extends Public_Controller
 			$m_sld_plg->saldo = $v_arr[2];
 			$m_sld_plg->save();
 		}
+	}
+
+	public function updateAplikasi() {
+		try {
+			shell_exec("cd c:/xampp_php7/htdocs/mgb_pos git pull https://ryansan93:Mgb654321@github.com/ryansan93/mgb_pos.git");
+
+			$this->result['status'] = 1;
+			$this->result['message'] = 'Aplikasi berhasil di update.';
+		} catch (Exception $e) {
+			$this->result['message'] = $e->getMessage();
+		}
+
+		display_json( $this->result );
 	}
 }

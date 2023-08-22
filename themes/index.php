@@ -195,6 +195,12 @@
                   </li>
                   <div class="dropdown-divider no-padding"></div>
                   <li class="dropdown-item">
+                    <a class="cursor-p" onclick="updateAplikasi()">
+                      <i class="fa fa-cog m-r-5 m-l-5"></i>
+                      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Update Aplikasi
+                    </a>
+                  </li>
+                  <li class="dropdown-item">
                     <a class="cursor-p" onclick="modalHelp()">
                       <i class="fa fa-cog m-r-5 m-l-5"></i>
                       &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Help
@@ -355,6 +361,23 @@
                 });
             });
         },'html');
+    }
+
+    function updateAplikasi() {
+      $.ajax({
+          url: 'home/Home/updateAplikasi',
+          data: {},
+          type: 'POST',
+          dataType: 'JSON',
+          beforeSend: function() {},
+          success: function(data) {
+              if ( data.status == 1 ) {
+                  bootbox.alert(data.message);
+              } else {
+                  bootbox.alert(data.message);
+              }
+          }
+      });
     }
   </script>
 

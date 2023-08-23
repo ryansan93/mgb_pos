@@ -1414,13 +1414,6 @@ class Penjualan extends Public_Controller
 
     public function printClosingShift()
     {
-        $m_cs = new \Model\Storage\ClosingShift_model();
-        $now = $m_cs->getDate();
-
-        $m_cs->tanggal = $now['waktu'];
-        $m_cs->user_id = $this->userid;
-        $m_cs->save();
-
         if ( $this->config->item('paper_size') == '58' ) {
             $result = $this->printClosingShift58();
         } else {
@@ -1437,6 +1430,13 @@ class Penjualan extends Public_Controller
             $now = $conf->getDate();
 
             $data = $this->getDataClosingShift( $now['tanggal'], $this->userid );
+
+            $m_cs = new \Model\Storage\ClosingShift_model();
+            $now = $m_cs->getDate();
+
+            $m_cs->tanggal = $now['waktu'];
+            $m_cs->user_id = $this->userid;
+            $m_cs->save();
 
             $nama_user = $this->userdata['detail_user']['nama_detuser'];
 
@@ -1575,6 +1575,14 @@ class Penjualan extends Public_Controller
             $waktu = $now['waktu'];
 
             $data = $this->getDataClosingShift( $now['tanggal'], $this->userid );
+
+            $m_cs = new \Model\Storage\ClosingShift_model();
+            $now = $m_cs->getDate();
+
+            $m_cs->tanggal = $now['waktu'];
+            $m_cs->user_id = $this->userid;
+            $m_cs->save();
+
             // $data = $this->getDataClosingShift( '2023-03-25', 'USR2301001' );
 
             $nama_user = $this->userdata['detail_user']['nama_detuser'];

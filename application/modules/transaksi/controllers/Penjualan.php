@@ -1117,8 +1117,10 @@ class Penjualan extends Public_Controller
             // $start_date = prev_date($today).' 00:00:00';
             $end_date = $today.' 23:59:59';
 
+            $kode_branch = $this->userdata['kodeBranch'];
+
             $m_jual = new \Model\Storage\Jual_model();
-            $d_jual = $m_jual->whereBetween('tgl_trans', [$start_date, $end_date])->where('kasir', $kasir)->where('mstatus', 1)->with(['jual_item', 'jual_diskon', 'bayar'])->get();
+            $d_jual = $m_jual->whereBetween('tgl_trans', [$start_date, $end_date])->where('kasir', $kasir)->where('branch', $kode_branch)->where('mstatus', 1)->with(['jual_item', 'jual_diskon', 'bayar'])->get();
 
             $data_bayar = ($d_jual->count() > 0) ? $this->getDataBayar($d_jual) : null;
             $data_belum_bayar = ($d_jual->count() > 0) ? $this->getDataBelumBayar($d_jual) : null;
@@ -1266,7 +1268,7 @@ class Penjualan extends Public_Controller
         display_json( $this->result );
     }
 
-    public function getDataClosingShift($tanggal, $kasir)
+    public function getDataClosingShift($tanggal, $kasir, $kodeBranch)
     {
         // $tanggal = '2022-09-15';
         // $kasir = 'USR2207003';
@@ -1282,7 +1284,7 @@ class Penjualan extends Public_Controller
         $end_date = substr($tanggal, 0, 10).' 23:59:59';
 
         $m_jual = new \Model\Storage\Jual_model();
-        $d_jual = $m_jual->whereBetween('tgl_trans', [$start_date, $end_date])->where('kasir', $kasir)->with(['jual_item', 'bayar'])->get();
+        $d_jual = $m_jual->whereBetween('tgl_trans', [$start_date, $end_date])->where('kasir', $kasir)->where('branch', $kodeBranch)->with(['jual_item', 'bayar'])->get();
 
         $data = null;
         $data_detail_transaksi = null;
@@ -1429,7 +1431,9 @@ class Penjualan extends Public_Controller
             $conf = new \Model\Storage\Conf();
             $now = $conf->getDate();
 
-            $data = $this->getDataClosingShift( $now['tanggal'], $this->userid );
+            $kode_branch = $this->userdata['kodeBranch'];
+
+            $data = $this->getDataClosingShift( $now['tanggal'], $this->userid, $kode_branch );
 
             $m_cs = new \Model\Storage\ClosingShift_model();
             $now = $m_cs->getDate();
@@ -1573,8 +1577,9 @@ class Penjualan extends Public_Controller
             $now = $conf->getDate();
 
             $waktu = $now['waktu'];
+            $kode_branch = $this->userdata['kodeBranch'];
 
-            $data = $this->getDataClosingShift( $now['tanggal'], $this->userid );
+            $data = $this->getDataClosingShift( $now['tanggal'], $this->userid, $kode_branch );
 
             $m_cs = new \Model\Storage\ClosingShift_model();
             $now = $m_cs->getDate();

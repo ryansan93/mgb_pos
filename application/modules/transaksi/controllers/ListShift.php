@@ -364,7 +364,7 @@ class ListShift extends Public_Controller
             $start_date = $d_cs_prev->tanggal;
             $end_date = $d_cs->tanggal;
 
-            cetak_r($start_date.' | '.$end_date, 1);
+            // cetak_r($start_date.' | '.$end_date, 1);
 
             $tgl_print = $d_cs->tanggal;
             $nama_user = $d_cs->user->username_user;
@@ -511,7 +511,7 @@ class ListShift extends Public_Controller
             $start_date = $d_cs_prev->tanggal;
             $end_date = $d_cs->tanggal;
 
-            cetak_r($start_date.' | '.$end_date, 1);
+            // cetak_r($start_date.' | '.$end_date, 1);
 
             $tgl_print = $d_cs->tanggal;
             $nama_user = $d_cs->user->username_user;

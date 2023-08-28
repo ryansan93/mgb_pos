@@ -1106,13 +1106,13 @@ class Penjualan extends Public_Controller
             $d_cs = $m_cs->where('user_id', $kasir)->orderBy('tanggal', 'desc')->first();
 
             $start_date = substr($today, 0, 10).' 00:00:00';
-            if ( $d_cs ) {
+            /* if ( $d_cs ) {
                 // $d_cs_prev = $m_cs->where('user_id', $kasir)->where('tanggal', '<', $d_cs->tanggal)->orderBy('tanggal', 'desc')->first();
                 // if ( $d_cs_prev ) {
                 //     $start_date = substr($d_cs_prev->tanggal, 0, 19);
                 // }
                 $start_date = substr($d_cs->tanggal, 0, 19);
-            }
+            } */
 
             // $start_date = prev_date($today).' 00:00:00';
             $end_date = $today.' 23:59:59';
@@ -1277,9 +1277,9 @@ class Penjualan extends Public_Controller
         $d_cs = $m_cs->where('user_id', $kasir)->orderBy('tanggal', 'desc')->first();
 
         $start_date = substr($tanggal, 0, 10).' 00:00:00';
-        if ( $d_cs ) {
+        /* if ( $d_cs ) {
             $start_date = substr($d_cs->tanggal, 0, 19);
-        }
+        } */
 
         $end_date = substr($tanggal, 0, 10).' 23:59:59';
 

@@ -1435,12 +1435,12 @@ class Penjualan extends Public_Controller
 
             $data = $this->getDataClosingShift( $now['tanggal'], $this->userid, $kode_branch );
 
-            $m_cs = new \Model\Storage\ClosingShift_model();
-            $now = $m_cs->getDate();
+            // $m_cs = new \Model\Storage\ClosingShift_model();
+            // $now = $m_cs->getDate();
 
-            $m_cs->tanggal = $now['waktu'];
-            $m_cs->user_id = $this->userid;
-            $m_cs->save();
+            // $m_cs->tanggal = $now['waktu'];
+            // $m_cs->user_id = $this->userid;
+            // $m_cs->save();
 
             $nama_user = $this->userdata['detail_user']['nama_detuser'];
 
@@ -1581,12 +1581,12 @@ class Penjualan extends Public_Controller
 
             $data = $this->getDataClosingShift( $now['tanggal'], $this->userid, $kode_branch );
 
-            $m_cs = new \Model\Storage\ClosingShift_model();
-            $now = $m_cs->getDate();
+            // $m_cs = new \Model\Storage\ClosingShift_model();
+            // $now = $m_cs->getDate();
 
-            $m_cs->tanggal = $now['waktu'];
-            $m_cs->user_id = $this->userid;
-            $m_cs->save();
+            // $m_cs->tanggal = $now['waktu'];
+            // $m_cs->user_id = $this->userid;
+            // $m_cs->save();
 
             // $data = $this->getDataClosingShift( '2023-03-25', 'USR2301001' );
 
@@ -1732,9 +1732,28 @@ class Penjualan extends Public_Controller
             $m_cs = new \Model\Storage\ClosingShift_model();
             $now = $m_cs->getDate();
 
-            $m_cs->tanggal = $now['waktu'];
-            $m_cs->user_id = $this->userid;
-            $m_cs->save();
+            $waktu = $now['waktu'];
+            $tanggal = $now['tanggal'];
+
+            $start_date = $tanggal.' 00:00:00.001';
+            $end_date = $tanggal.' 23:59:59.999';
+
+            $d_cs = $m_cs->whereBetween('tanggal', [$start_date, $end_date])->where('user_id', $this->userid)->first();
+
+            if ( $d_cs ) {
+                $m_cs = new \Model\Storage\ClosingShift_model();
+                $m_cs->where('id', $d_cs->id)->update(
+                    array(
+                        'tanggal' => $waktu
+                    )
+                );
+            } else {
+                $m_cs = new \Model\Storage\ClosingShift_model();
+
+                $m_cs->tanggal = $waktu;
+                $m_cs->user_id = $this->userid;
+                $m_cs->save();
+            }
 
             $this->result['status'] = 1;
         } catch (Exception $e) {

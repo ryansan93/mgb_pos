@@ -197,7 +197,7 @@ class ListShift extends Public_Controller
 
         $kasir = $d_cs->user_id;
 
-        $d_cs_prev = $m_cs->where('id', '<', $id_closing_shift)->where('user_id', $kasir)->orderBy('tanggal', 'desc')->first();
+        $d_cs_prev = $m_cs->where('tanggal', '<', $d_cs->tanggal)->where('user_id', $kasir)->orderBy('tanggal', 'desc')->first();
 
         $start_date = $d_cs_prev->tanggal;
         $end_date = $d_cs->tanggal;
@@ -358,11 +358,13 @@ class ListShift extends Public_Controller
 
             $m_cs = new \Model\Storage\ClosingShift_model();
             $d_cs = $m_cs->where('id', $id_closing_shift)->with(['user'])->orderBy('tanggal', 'desc')->first();
-            $d_cs_prev = $m_cs->where('id', '<', $id_closing_shift)->with(['user'])->orderBy('tanggal', 'desc')->first();
+            $d_cs_prev = $m_cs->where('tanggal', '<', $d_cs->tanggal)->where('user_id', $d_cs->user_id)->with(['user'])->orderBy('tanggal', 'desc')->first();
 
             $kasir = $d_cs_prev->user_id;
             $start_date = $d_cs_prev->tanggal;
             $end_date = $d_cs->tanggal;
+
+            cetak_r($start_date.' | '.$end_date, 1);
 
             $tgl_print = $d_cs->tanggal;
             $nama_user = $d_cs->user->username_user;
@@ -503,11 +505,13 @@ class ListShift extends Public_Controller
 
             $m_cs = new \Model\Storage\ClosingShift_model();
             $d_cs = $m_cs->where('id', $id_closing_shift)->with(['user'])->orderBy('tanggal', 'desc')->first();
-            $d_cs_prev = $m_cs->where('id', '<', $id_closing_shift)->with(['user'])->orderBy('tanggal', 'desc')->first();
+            $d_cs_prev = $m_cs->where('tanggal', '<', $d_cs->tanggal)->where('user_id', $d_cs->user_id)->with(['user'])->orderBy('tanggal', 'desc')->first();
 
             $kasir = $d_cs_prev->user_id;
             $start_date = $d_cs_prev->tanggal;
             $end_date = $d_cs->tanggal;
+
+            cetak_r($start_date.' | '.$end_date, 1);
 
             $tgl_print = $d_cs->tanggal;
             $nama_user = $d_cs->user->username_user;

@@ -104,15 +104,16 @@ class ListShift extends Public_Controller
             $kasir = $d_cs->user_id;
 
             $start_date = substr($today, 0, 10).' 00:00:00';
+            $end_date = $today.' 23:59:59';
             if ( $d_cs ) {
                 $d_cs_prev = $m_cs->where('user_id', $d_cs->user_id)->where('tanggal', '<', $d_cs->tanggal)->orderBy('tanggal', 'desc')->first();
+
                 if ( $d_cs_prev ) {
                     $start_date = substr($d_cs_prev->tanggal, 0, 19);
                 }
-            }
 
-            // $start_date = prev_date($today).' 00:00:00';
-            $end_date = $today.' 23:59:59';
+                $end_date = $d_cs->tanggal;
+            }
 
             $m_jual = new \Model\Storage\Jual_model();
             $d_jual = $m_jual->whereBetween('tgl_trans', [$start_date, $end_date])->where('kasir', $kasir)->where('mstatus', 1)->with(['jual_item', 'jual_diskon', 'bayar'])->get();

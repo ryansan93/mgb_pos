@@ -65,12 +65,24 @@ class ListShift extends Public_Controller
         $sql = "
             select 
                 cs.*,
-                mu.username_user as nama
+                mu.username_user as nama,
+                case
+                    when cs.id = max_cs.id then
+                        1
+                    else
+                        0
+                end as _delete
             from closing_shift cs 
             right join
                 ms_user mu
                 on
                     cs.user_id = mu.id_user
+            left join
+                (
+                    select max(id) as id, user_id from closing_shift group by user_id
+                ) max_cs
+                on
+                    cs.user_id = max_cs.user_id
             where 
                 cs.tanggal between '".$start_date."' and '".$end_date."'
             order by
@@ -648,5 +660,23 @@ class ListShift extends Public_Controller
         }
 
         return $this->result;
+    }
+
+    public function delete() {
+        $params = $this->input->post('params');
+
+        try {
+            $id = $params['id'];
+
+            $m_cs = new \Model\Storage\ClosingShift_model();
+            $m_cs->where('id', $id)->delete();
+
+            $this->result['status'] = 1;
+            $this->result['message'] = 'Data berhasil di hapus.';
+        } catch (Exception $e) {
+            $this->result['message'] = $e->getMessage();
+        }
+
+        display_json( $this->result );
     }
 }

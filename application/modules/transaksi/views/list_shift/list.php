@@ -4,6 +4,11 @@
 			<td><?php echo $value['user_id']; ?></td>
 			<td><?php echo $value['nama']; ?></td>
 			<td><?php echo $value['tanggal']; ?></td>
+			<td>
+				<?php if ( $value['_delete'] == 1 ) : ?>
+					<button type="button" class="col-xs-12 btn btn-danger" onclick="ls.delete(this)"><i class="fa fa-trash"></i></button>
+				<?php endif ?>
+			</td>
 		</tr>
 	<?php endforeach ?>
 <?php else: ?>

@@ -124,6 +124,37 @@ var ls = {
             }
         });
     }, // end - printNota
+
+    delete: function(elm) {
+        var tr = $(elm).closest('tr');
+
+        bootbox.alert('Apakah anda yakin ingin menghapus data end shift ?', function(result) {
+            if ( result ) {
+                var params = {
+                    'id': $(tr).attr('data-id')
+                };
+
+                $.ajax({
+                    url: 'transaksi/ListShift/delete',
+                    data: {
+                        'params': params
+                    },
+                    type: 'POST',
+                    dataType: 'JSON',
+                    beforeSend: function() { showLoading(); },
+                    success: function(data) {
+                        hideLoading();
+
+                        if ( data.status == 1 ) {
+                            ls.getLists();
+                        } else {
+                            bootbox.alert(data.message);
+                        } 
+                    }
+                });
+            }
+        });
+    }, // end - delete
 };
 
 ls.startUp();

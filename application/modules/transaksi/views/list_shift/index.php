@@ -22,11 +22,12 @@
 					<th class="col-xs-1">ID User</th>
 					<th class="col-xs-2">User</th>
 					<th class="col-xs-2">Tgl Print Shift</th>
+					<th class="col-xs-1">Action</th>
 				</tr>
 			</thead>
 			<tbody>
 				<tr>
-					<td colspan="3">Data tidak ditemukan.</td>
+					<td colspan="4">Data tidak ditemukan.</td>
 				</tr>
 			</tbody>
 		</table>

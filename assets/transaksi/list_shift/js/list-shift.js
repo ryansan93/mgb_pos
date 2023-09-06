@@ -138,7 +138,7 @@ var ls = {
     delete: function(elm) {
         var tr = $(elm).closest('tr');
 
-        bootbox.alert('Apakah anda yakin ingin menghapus data end shift ?', function(result) {
+        bootbox.confirm('Apakah anda yakin ingin menghapus data end shift ?', function(result) {
             if ( result ) {
                 var params = {
                     'id': $(tr).attr('data-id')

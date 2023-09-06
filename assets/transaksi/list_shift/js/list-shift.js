@@ -39,6 +39,14 @@ var ls = {
 	                hideLoading();
 	                
 	                $('table tbody').html( html );
+
+                    $.map( $('table tbody tr td'), function (td) {
+                        if ( $(td).find('button').length == 0 ) {
+                            $(td).on('click', function () {
+                                ls.modalListBayar( $(this) );
+                            });
+                        }
+                    });
 	            }
 	        });
 		}
@@ -47,8 +55,10 @@ var ls = {
 	modalListBayar: function (elm) {
         $('.modal').modal('hide');
 
+        var tr = $(elm).closest('tr');
+
         var params = {
-        	'id': $(elm).attr('data-id')
+        	'id': $(tr).attr('data-id')
         };
 
         $.ajax({

@@ -1,6 +1,6 @@
 <?php if ( !empty($data) && count($data) > 0 ): ?>
 	<?php foreach ($data as $key => $value): ?>
-		<tr class="cursor-p" onclick="ls.modalListBayar(this)" data-id="<?php echo $value['id']; ?>">
+		<tr class="cursor-p" data-id="<?php echo $value['id']; ?>">
 			<td><?php echo $value['user_id']; ?></td>
 			<td><?php echo $value['nama']; ?></td>
 			<td><?php echo $value['tanggal']; ?></td>

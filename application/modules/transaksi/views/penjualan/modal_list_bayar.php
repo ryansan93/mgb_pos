@@ -151,5 +151,8 @@
 		<div class="col-lg-12" style="padding-top: 10px;">
 			<button type="button" class="btn btn-success col-lg-12 btn_print_closing_shift"><i class="fa fa-print"></i> Print Closing Kasir</button>
 		</div>
+		<div class="col-lg-12" style="padding-top: 10px;">
+			<button type="button" class="btn btn-primary col-lg-12 btn_end_shift"><i class="fa fa-check"></i> End Shift Kasir</button>
+		</div>
 	</div>
 </div>

@@ -199,24 +199,66 @@ class Penjualan extends Public_Controller
         $today = $now['tanggal'];
 
         $sql = "
-            select menu.id, menu.kode_menu, menu.nama, menu.deskripsi, hm.harga as harga_jual, menu.kategori_menu_id, count(pm.kode_paket_menu) as jml_paket from menu menu
+            select * from
+            (
+                select 
+                    m.id,
+                    m.kode_menu,
+                    m.nama,
+                    m.deskripsi,
+                    hm.harga as harga_jual,
+                    m.kategori_menu_id,
+                    count(pm.kode_paket_menu) as jml_paket,
+                    'non group' as jenis
+                from menu m
                 left join
                     (
-                    select * from harga_menu where id in (
-                        select max(id) as id from harga_menu where status = 1 and tgl_mulai <= '".$today."' group by jenis_pesanan_kode, menu_kode
-                    )) hm 
+                        select * from harga_menu where id in (
+                            select max(id) as id from harga_menu where status = 1 and tgl_mulai <= '".$today."' group by jenis_pesanan_kode, menu_kode
+                        )
+                    ) hm 
                     on
-                        menu.kode_menu = hm.menu_kode 
+                        m.kode_menu = hm.menu_kode 
                 left join
                     paket_menu pm
                     on
-                        menu.kode_menu = pm.menu_kode
+                        m.kode_menu = pm.menu_kode
                 where
-                    menu.kategori_menu_id = ".$id_kategori." and
+                    m.kategori_menu_id = ".$id_kategori." and
                     hm.jenis_pesanan_kode = '".$jenis_pesanan."' and
-                    menu.status = 1
-            group by menu.id, menu.kode_menu, menu.nama, menu.deskripsi, hm.harga, menu.kategori_menu_id, hm.jenis_pesanan_kode
-            order by menu.nama asc
+                    m.status = 1 and
+                    not exists (select * from group_menu_detail where menu_kode = m.kode_menu)
+                group by m.id, m.kode_menu, m.nama, m.deskripsi, hm.harga, m.kategori_menu_id, hm.jenis_pesanan_kode
+
+                union all
+
+                select
+                    gm.id,
+                    '' as kode_menu,
+                    gm.nama,
+                    '' as deskripsi,
+                    0 as harga_jual,
+                    m.kategori_menu_id,
+                    0 as jml_paket,
+                    'group' as jenis
+                from group_menu_detail gmd
+                right join
+                    group_menu gm
+                    on
+                        gmd.id_header = gm.id
+                left join
+                    menu m
+                    on
+                        gmd.menu_kode = m.kode_menu
+                where
+                    m.kategori_menu_id = ".$id_kategori."
+                group by
+                    gm.id,
+                    gm.nama,
+                    m.kategori_menu_id
+            ) data
+            order by
+                data.nama asc
         ";
         $d_menu = $m_menu->hydrateRaw($sql);
 
@@ -228,6 +270,68 @@ class Penjualan extends Public_Controller
         $content['data'] = $data;
 
         $html = $this->load->view($this->pathView . 'list_menu', $content, TRUE);
+
+        echo $html;
+    }
+
+    public function getMenuGroup()
+    {
+        $id_group_menu = $this->input->get('id_group_menu');
+        $jenis_pesanan = $this->input->get('jenis_pesanan');
+
+        $m_menu = new \Model\Storage\Menu_model();
+        $now = $m_menu->getDate();
+
+        $today = $now['tanggal'];
+
+        $sql = "
+            select
+                m.id,
+                m.kode_menu,
+                m.nama,
+                m.deskripsi,
+                hm.harga as harga_jual,
+                m.kategori_menu_id,
+                count(pm.kode_paket_menu) as jml_paket,
+                'non group' as jenis
+            from group_menu_detail gmd
+            right join
+                group_menu gm
+                on
+                    gmd.id_header = gm.id
+            left join
+                menu m
+                on
+                    gmd.menu_kode = m.kode_menu
+            left join
+                (
+                    select * from harga_menu where id in (
+                        select max(id) as id from harga_menu where status = 1 and tgl_mulai <= '".$today."' group by jenis_pesanan_kode, menu_kode
+                    )
+                ) hm 
+                on
+                    m.kode_menu = hm.menu_kode 
+            left join
+                paket_menu pm
+                on
+                    m.kode_menu = pm.menu_kode
+            where
+                gm.id = ".$id_group_menu." and
+                hm.jenis_pesanan_kode = '".$jenis_pesanan."'
+            group by m.id, m.kode_menu, m.nama, m.deskripsi, hm.harga, m.kategori_menu_id, hm.jenis_pesanan_kode
+            order by
+                m.nama asc
+        ";
+        $d_menu = $m_menu->hydrateRaw($sql);
+
+        $data = null;
+        if ( $d_menu->count() > 0 ) {
+            $data = $d_menu->toArray();
+        }
+
+        $content['data'] = $data;
+
+        $html = $this->load->view($this->pathView . 'list_menu_group', $content, TRUE);
 
         echo $html;
     }
@@ -488,7 +592,7 @@ class Penjualan extends Public_Controller
             $m_bayar->jml_tagihan = $params['jml_tagihan'];
             $m_bayar->jml_bayar = $params['jml_bayar'];
             $m_bayar->jenis_bayar = $params['jenis_bayar'];
-            $m_bayar->jenis_kartu_kode = $params['jenis_kartu_kode'];
+            $m_bayar->jenis_kartu_kode = (stristr($params['jenis_bayar'], 'tunai') === FALSE) ? $params['jenis_kartu_kode'] : null;
             $m_bayar->no_bukti = $params['no_bukti'];
             $m_bayar->save();
 
@@ -1093,31 +1197,23 @@ class Penjualan extends Public_Controller
     public function modalListBayar()
     {
         try {
+            $kode_branch = $this->userdata['kodeBranch'];
+
             $m_conf = new \Model\Storage\Conf();
             $now = $m_conf->getDate();
             $today = $now['tanggal'];
-            // $today = date('Y-m-d');
-            // $today = '2022-09-15';
 
             $kasir = $this->userid;
-            // $kasir = 'USR2207003';
 
             $m_cs = new \Model\Storage\ClosingShift_model();
-            $d_cs = $m_cs->where('user_id', $kasir)->orderBy('tanggal', 'desc')->first();
+            $d_cs = $m_cs->where('user_id', $kasir)->where('branch_kode', $kode_branch)->orderBy('tanggal', 'desc')->first();
 
             $start_date = substr($today, 0, 10).' 00:00:00';
-            /* if ( $d_cs ) {
-                // $d_cs_prev = $m_cs->where('user_id', $kasir)->where('tanggal', '<', $d_cs->tanggal)->orderBy('tanggal', 'desc')->first();
-                // if ( $d_cs_prev ) {
-                //     $start_date = substr($d_cs_prev->tanggal, 0, 19);
-                // }
+            if ( $d_cs ) {
                 $start_date = substr($d_cs->tanggal, 0, 19);
-            } */
+            }
 
-            // $start_date = prev_date($today).' 00:00:00';
-            $end_date = $today.' 23:59:59';
-
-            $kode_branch = $this->userdata['kodeBranch'];
+            $end_date = next_date($today).' 23:59:59';
 
             $m_jual = new \Model\Storage\Jual_model();
             $d_jual = $m_jual->whereBetween('tgl_trans', [$start_date, $end_date])->where('kasir', $kasir)->where('branch', $kode_branch)->where('mstatus', 1)->with(['jual_item', 'jual_diskon', 'bayar'])->get();
@@ -1289,6 +1385,7 @@ class Penjualan extends Public_Controller
         $data = null;
         $data_detail_transaksi = null;
         $data_detail_pembayaran = null;
+        $data_item_terpakai = null;
         if ( $d_jual->count() > 0 ) {
             $d_jual = $d_jual->toArray();
 
@@ -1296,15 +1393,15 @@ class Penjualan extends Public_Controller
             $data_detail_transaksi['grand_total_jumlah'] = 0;
             $data_detail_pembayaran['grand_total'] = 0;
 
-            $data_detail_transaksi['detail']['item_terjual']['nama'] = 'item terjual';
+            $data_detail_transaksi['detail']['item_terjual']['nama'] = 'menu terjual';
             $data_detail_transaksi['detail']['item_terjual']['jumlah'] = 0;
             $data_detail_transaksi['detail']['item_terjual']['total'] = 0;
 
-            $data_detail_transaksi['detail']['item_belum_bayar']['nama'] = 'item belum bayar';
+            $data_detail_transaksi['detail']['item_belum_bayar']['nama'] = 'menu belum bayar';
             $data_detail_transaksi['detail']['item_belum_bayar']['jumlah'] = 0;
             $data_detail_transaksi['detail']['item_belum_bayar']['total'] = 0;
 
-            $data_detail_transaksi['detail']['item_batal']['nama'] = 'item batal';
+            $data_detail_transaksi['detail']['item_batal']['nama'] = 'menu batal';
             $data_detail_transaksi['detail']['item_batal']['jumlah'] = 0;
             $data_detail_transaksi['detail']['item_batal']['total'] = 0;
             foreach ($d_jual as $k_jual => $v_jual) {
@@ -1406,9 +1503,52 @@ class Penjualan extends Public_Controller
             }
         }
 
+        $m_conf = new \Model\Storage\Conf();
+        $sql = "
+            select
+                bom.nama,
+                bom.satuan,
+                sum((bom.jumlah / bom.jml_porsi) * ji.jumlah) as jumlah
+            from jual_item ji 
+            right join
+                jual j
+                on
+                    ji.faktur_kode = j.kode_faktur 
+            left join
+                (
+                    select bd.*, b.menu_kode , b.jml_porsi, i.nama from bom_det bd
+                    right join
+                        bom b
+                        on
+                            bd.id_header = b.id
+                    left join
+                        item i
+                        on
+                            i.kode = bd.item_kode
+                ) bom
+                on
+                    bom.menu_kode = ji.menu_kode 
+            where
+                bom.nama is not null and
+                j.tgl_trans between '".$start_date."' and '".$end_date."' and
+                j.kasir = '".$kasir."' and
+                j.branch = '".$kodeBranch."'    
+            group by
+                bom.nama,
+                bom.satuan
+            order by
+                bom.nama
+        ";
+        $d_item_terpakai = $m_conf->hydrateRaw( $sql );
+
+        if ( $d_item_terpakai->count() > 0 ) {
+            $data_item_terpakai = $d_item_terpakai->toArray();
+        }
+
         $data = array(
             'detail_transaksi' => $data_detail_transaksi,
-            'detail_pembayaran' => $data_detail_pembayaran
+            'detail_pembayaran' => $data_detail_pembayaran,
+            'data_item_terpakai' => $data_item_terpakai
         );
 
         return $data;
@@ -1558,6 +1698,29 @@ class Penjualan extends Public_Controller
             $printer -> selectPrintMode(1);
             $lineGrandTotal = sprintf('%28s %13.40s','GRAND TOTAL', angkaDecimal($data['detail_pembayaran']['grand_total']));
             $printer -> text("$lineGrandTotal\n\n");
+
+            $printer = new Mike42\Escpos\Printer($connector);
+            $printer -> selectPrintMode(1);
+            $printer -> setTextSize(2, 1);
+            $printer -> textRaw("\ITEM TERPAKAI\n");
+            $printer -> setJustification(1);
+            $printer -> selectPrintMode(8);
+            $printer -> textRaw("================================\n");
+
+            foreach ($data['data_item_terpakai'] as $k_it => $v_it) {
+                $printer -> setJustification(0);
+                $printer -> selectPrintMode(1);
+
+                $line = sprintf('%-28s %13.40s', strtoupper($v_it['nama']), strtoupper(angkaDecimal($v_it['jumlah']).' ('.$v_it['satuan'].')'));
+                $printer -> text("$line\n");
+
+                $printer -> textRaw("\n");
+            }
+
+            $printer = new Mike42\Escpos\Printer($connector);
+            $printer -> setJustification(1);
+            $printer -> selectPrintMode(8);
+            $printer -> text("--------------------------------\n");
 
             $printer -> cut();
             $printer -> close();
@@ -1715,6 +1878,51 @@ class Penjualan extends Public_Controller
             $lineGrandTotal = sprintf('%28s %13.40s','GRAND TOTAL', angkaDecimal($data['detail_pembayaran']['grand_total']));
             $printer -> text("$lineGrandTotal\n\n");
 
+            $printer = new Mike42\Escpos\Printer($connector);
+            $printer -> selectPrintMode(1);
+            $printer -> setTextSize(2, 1);
+            $printer -> textRaw("\nITEM TERPAKAI\n");
+            $printer -> setJustification(1);
+            $printer -> selectPrintMode(8);
+            $printer -> textRaw("==========================================\n");
+
+            foreach ($data['data_item_terpakai'] as $k_it => $v_it) {
+                $printer -> setJustification(0);
+                $printer -> selectPrintMode(1);
+
+                $bayar = $v_urut['bayar'];
+                $kembalian = isset($v_urut['kembalian']) ? $v_urut['kembalian'] : 0;
+                $nilai = $bayar - $kembalian;
+
+                $line = sprintf('%-46s %13.40s', strtoupper($v_it['nama']), strtoupper(angkaDecimal($v_it['jumlah']).' ('.$v_it['satuan'].')'));
+                $printer -> text("$line\n");
+
+                // if ( stristr($k_dp, 'tunai') !== FALSE ) {
+                //     // $printer -> textRaw(strtoupper($v_dp['nama'])."\n");
+
+                //     // if ( isset($v_dp) ) {
+                //     //     foreach ($v_dp as $k_det => $v_det) {
+                //     //         if ( stristr($k_det, 'nama') === FALSE ) {
+                //     //             $line = sprintf('%-28s %13.40s', strtoupper($k_det), angkaDecimal($v_det));
+                //     //             $printer -> text("$line\n");
+                //     //         }
+                //     //     }
+                //     // }
+                //     $line = sprintf('%-46s %13.40s', strtoupper($v_urut['nama']), angkaDecimal($v_urut['tagihan']));
+                //     $printer -> text("$line\n");
+                // } else {
+                //     $line = sprintf('%-46s %13.40s', strtoupper($v_urut['nama']), angkaDecimal($v_urut['bayar']));
+                //     $printer -> text("$line\n");
+                // }
+
+                $printer -> textRaw("\n");
+            }
+
+            $printer = new Mike42\Escpos\Printer($connector);
+            $printer -> setJustification(1);
+            $printer -> selectPrintMode(8);
+            $printer -> text("------------------------------------------\n");
+
             $printer -> cut();
             $printer -> close();
 
@@ -1726,36 +1934,83 @@ class Penjualan extends Public_Controller
         return $this->result;
     }
 
-    public function saveClosingShift()
+    public function saveEndShift()
     {
         try {
-            $m_cs = new \Model\Storage\ClosingShift_model();
-            $now = $m_cs->getDate();
+            $m_conf = new \Model\Storage\Conf();
+            $now = $m_conf->getDate();
 
             $waktu = $now['waktu'];
             $tanggal = $now['tanggal'];
+            $kode_branch = $this->userdata['kodeBranch'];
 
-            $start_date = $tanggal.' 00:00:00.001';
-            $end_date = $tanggal.' 23:59:59.999';
+            $m_conf = new \Model\Storage\Conf();
+            $sql = "
+                select top 1 cs.* from closing_shift cs
+                where
+                    cs.branch_kode = '".$kode_branch."'
+                order by
+                cs.id desc
+            ";
+            $d_conf = $m_conf->hydrateRaw( $sql );
 
-            $d_cs = $m_cs->whereBetween('tanggal', [$start_date, $end_date])->where('user_id', $this->userid)->first();
+            $sql_id = "";
+            if ( $d_conf->count() > 0 ) {
+                $d_conf = $d_conf->toArray()[0];
 
-            if ( $d_cs ) {
-                $m_cs = new \Model\Storage\ClosingShift_model();
-                $m_cs->where('id', $d_cs->id)->update(
-                    array(
-                        'tanggal' => $waktu
-                    )
-                );
-            } else {
-                $m_cs = new \Model\Storage\ClosingShift_model();
-
-                $m_cs->tanggal = $waktu;
-                $m_cs->user_id = $this->userid;
-                $m_cs->save();
+                $sql_id = "and s.id <> ".$d_conf['id']."";
             }
 
+            $m_conf = new \Model\Storage\Conf();
+            $sql = "
+                select s.* from shift s
+                where
+                    s.branch_kode = '".$kode_branch."' and
+                    (
+                        (s.start_time < '".substr($waktu, 11, 5).':59'."' and s.end_time >= '".substr($waktu, 11, 5).':59'."') 
+                        or 
+                        s.end_time <= '".substr($waktu, 11, 5).':59'."'
+                    )
+                    ".$sql_id."
+                order by
+                    s.start_time asc
+            ";
+            $d_conf = $m_conf->hydrateRaw( $sql );
+
+            $shift_id = null;
+            if ( $d_conf->count() > 0 ) {
+                $shift_id = $d_conf->toArray()[0]['id'];
+            }
+
+            $m_cs = new \Model\Storage\ClosingShift_model();
+            $m_cs->tanggal = $waktu;
+            $m_cs->user_id = $this->userid;
+            $m_cs->shift_id = $shift_id;
+            $m_cs->branch_kode = $kode_branch;
+            $m_cs->save();
+
+            // $start_date = $tanggal.' 00:00:00.001';
+            // $end_date = $tanggal.' 23:59:59.999';
+
+            // $d_cs = $m_cs->whereBetween('tanggal', [$start_date, $end_date])->where('user_id', $this->userid)->first();
+
+            // if ( $d_cs ) {
+            //     $m_cs = new \Model\Storage\ClosingShift_model();
+            //     $m_cs->where('id', $d_cs->id)->update(
+            //         array(
+            //             'tanggal' => $waktu
+            //         )
+            //     );
+            // } else {
+            //     $m_cs = new \Model\Storage\ClosingShift_model();
+
+            //     $m_cs->tanggal = $waktu;
+            //     $m_cs->user_id = $this->userid;
+            //     $m_cs->save();
+            // }
+
             $this->result['status'] = 1;
+            $this->result['message'] = 'End shift kasir <b>'.$this->userdata['detail_user']['nama_detuser'].'</b> telah berhasil.';
         } catch (Exception $e) {
             $this->result['message'] = $e -> getMessage();
         }

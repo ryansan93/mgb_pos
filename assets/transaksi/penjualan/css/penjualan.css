@@ -60,6 +60,15 @@ div.detail_menu > div.menu > div.border {
 	box-shadow: 2px 2px #dedede;
 }
 
+div.menu_group {
+	margin: 0;
+    position: absolute;
+    top: 50%;
+    -ms-transform: translateY(-50%);
+    transform: translateY(-50%);
+    text-align: center;
+}
+
 div.nama_menu, div.harga_menu {
 	font-size: 12px;
 	font-weight: bold;

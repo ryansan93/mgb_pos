@@ -340,6 +340,28 @@ var jual = {
         });
 	}, // end - getMenu
 
+    getMenuGroup: function (elm) {
+        var id_group_menu = $(elm).attr('data-id');
+
+		$.ajax({
+            url: 'transaksi/Penjualan/getMenuGroup',
+            data: {
+                'id_group_menu': id_group_menu,
+            	'jenis_pesanan': jenis_pesanan
+            },
+            type: 'GET',
+            dataType: 'html',
+            beforeSend: function() {},
+            success: function(html) {
+                $('div.detail_menu').html( html );
+            }
+        });
+    }, // end - getMenuGroup
+
+    cancelGroup: function () {
+        $('li[data-aktif=1]').click();
+    }, // end - cancelGroup
+
     cekPaket: function(elm) {
         var jml_paket = $(elm).data('jmlpaket');
 
@@ -559,6 +581,8 @@ var jual = {
 
             $(div_jenis_pesanan).append( _menu );
         }
+
+        jual.cancelGroup();
 
         jual.hitSubTotal();
     }, // end - pilihMenu
@@ -1399,6 +1423,10 @@ var jual = {
                         $(this).find('.btn_print_closing_shift').click(function() {
                             jual.printClosingShift(); 
                         });
+
+                        $(this).find('.btn_end_shift').click(function() {
+                            jual.saveEndShift(); 
+                        });
                     });
                 } else {
                     bootbox.alert(data.message);
@@ -1613,10 +1641,11 @@ var jual = {
             data: {},
             type: 'POST',
             dataType: 'JSON',
-            beforeSend: function() {},
+            beforeSend: function() { showLoading('Proses Print . . .'); },
             success: function(data) {
+                hideLoading();
                 if ( data.status == 1 ) {
-                    jual.saveClosingShift();
+                    // jual.saveClosingShift();
                 } else {
                     bootbox.alert(data.message);
                 } 
@@ -1624,23 +1653,33 @@ var jual = {
         });
     }, // end - printNota
 
-    saveClosingShift: function() {
-        $.ajax({
-            url: 'transaksi/Penjualan/saveClosingShift',
-            data: {},
-            type: 'POST',
-            dataType: 'JSON',
-            beforeSend: function() { 
-                // showLoading('Saving Closing Shift . . .'); 
-            },
-            success: function(data) {
-                // hideLoading();
-                if ( data.status != 1 ) {
-                    bootbox.alert(data.message);
-                }
+    saveEndShift: function() {
+        bootbox.confirm('Apakah anda yakin ingin mengakhiri shift anda ?', function (result) {
+            if ( result ) {
+                $.ajax({
+                    url: 'transaksi/Penjualan/saveEndShift',
+                    data: {},
+                    type: 'POST',
+                    dataType: 'JSON',
+                    beforeSend: function() { 
+                        showLoading('Saving End Shift . . .'); 
+                    },
+                    success: function(data) {
+                        hideLoading();
+                        if ( data.status == 1 ) {
+                            bootbox.alert(data.message, function () {
+                                // var a = '<a class="btn btn-primary" href="user/Login/logout"></a>';
+                                // $(a).click();
+                                window.open('user/Login/logout', '_self');
+                            });
+                        } else {
+                            bootbox.alert(data.message);
+                        }
+                    }
+                });
             }
         });
-    }, // end - saveClosingShift
+    }, // end - saveEndShift
 };
 
 jual.start_up();

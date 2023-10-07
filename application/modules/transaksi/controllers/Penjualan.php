@@ -1886,36 +1886,38 @@ class Penjualan extends Public_Controller
             $printer -> selectPrintMode(8);
             $printer -> textRaw("==========================================\n");
 
-            foreach ($data['data_item_terpakai'] as $k_it => $v_it) {
-                $printer -> setJustification(0);
-                $printer -> selectPrintMode(1);
+            if ( isset($data['data_item_terpakai']) && !empty($data['data_item_terpakai']) ) {
+                foreach ($data['data_item_terpakai'] as $k_it => $v_it) {
+                    $printer -> setJustification(0);
+                    $printer -> selectPrintMode(1);
 
-                $bayar = $v_urut['bayar'];
-                $kembalian = isset($v_urut['kembalian']) ? $v_urut['kembalian'] : 0;
-                $nilai = $bayar - $kembalian;
+                    $bayar = $v_urut['bayar'];
+                    $kembalian = isset($v_urut['kembalian']) ? $v_urut['kembalian'] : 0;
+                    $nilai = $bayar - $kembalian;
 
-                $line = sprintf('%-46s %13.40s', strtoupper($v_it['nama']), strtoupper(angkaDecimal($v_it['jumlah']).' ('.$v_it['satuan'].')'));
-                $printer -> text("$line\n");
+                    $line = sprintf('%-46s %13.40s', strtoupper($v_it['nama']), strtoupper(angkaDecimal($v_it['jumlah']).' ('.$v_it['satuan'].')'));
+                    $printer -> text("$line\n");
 
-                // if ( stristr($k_dp, 'tunai') !== FALSE ) {
-                //     // $printer -> textRaw(strtoupper($v_dp['nama'])."\n");
+                    // if ( stristr($k_dp, 'tunai') !== FALSE ) {
+                    //     // $printer -> textRaw(strtoupper($v_dp['nama'])."\n");
 
-                //     // if ( isset($v_dp) ) {
-                //     //     foreach ($v_dp as $k_det => $v_det) {
-                //     //         if ( stristr($k_det, 'nama') === FALSE ) {
-                //     //             $line = sprintf('%-28s %13.40s', strtoupper($k_det), angkaDecimal($v_det));
-                //     //             $printer -> text("$line\n");
-                //     //         }
-                //     //     }
-                //     // }
-                //     $line = sprintf('%-46s %13.40s', strtoupper($v_urut['nama']), angkaDecimal($v_urut['tagihan']));
-                //     $printer -> text("$line\n");
-                // } else {
-                //     $line = sprintf('%-46s %13.40s', strtoupper($v_urut['nama']), angkaDecimal($v_urut['bayar']));
-                //     $printer -> text("$line\n");
-                // }
+                    //     // if ( isset($v_dp) ) {
+                    //     //     foreach ($v_dp as $k_det => $v_det) {
+                    //     //         if ( stristr($k_det, 'nama') === FALSE ) {
+                    //     //             $line = sprintf('%-28s %13.40s', strtoupper($k_det), angkaDecimal($v_det));
+                    //     //             $printer -> text("$line\n");
+                    //     //         }
+                    //     //     }
+                    //     // }
+                    //     $line = sprintf('%-46s %13.40s', strtoupper($v_urut['nama']), angkaDecimal($v_urut['tagihan']));
+                    //     $printer -> text("$line\n");
+                    // } else {
+                    //     $line = sprintf('%-46s %13.40s', strtoupper($v_urut['nama']), angkaDecimal($v_urut['bayar']));
+                    //     $printer -> text("$line\n");
+                    // }
 
-                $printer -> textRaw("\n");
+                    $printer -> textRaw("\n");
+                }
             }
 
             $printer = new Mike42\Escpos\Printer($connector);

@@ -1532,7 +1532,8 @@ class Penjualan extends Public_Controller
                 bom.nama is not null and
                 j.tgl_trans between '".$start_date."' and '".$end_date."' and
                 j.kasir = '".$kasir."' and
-                j.branch = '".$kodeBranch."'    
+                j.branch = '".$kodeBranch."' and
+                j.mstatus = 1
             group by
                 bom.nama,
                 bom.satuan

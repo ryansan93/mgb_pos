@@ -4,7 +4,7 @@ class ListShift extends Public_Controller
 {
     private $pathView = 'transaksi/list_shift/';
     private $url;
-    private $hakAkses;
+    private $hasAkses;
     // private $persen_ppn;
     /**
      * Constructor
@@ -400,6 +400,8 @@ class ListShift extends Public_Controller
             $printer -> text("$lineNoTransaksi\n");
             $lineKasir = sprintf('%-13s %1.05s %-15s','Tanggal',':', $tgl_print);
             $printer -> text("$lineKasir\n");
+            $lineBranch = sprintf('%-13s %1.05s %-15s','Outlet',':', $this->kodebranch);
+            $printer -> text("$lineBranch\n");
 
             $printer = new Mike42\Escpos\Printer($connector);
             $printer -> selectPrintMode(1);
@@ -547,6 +549,8 @@ class ListShift extends Public_Controller
             $printer -> text("$lineNoTransaksi\n");
             $lineKasir = sprintf('%-13s %1.05s %-15s','Tanggal',':', $tgl_print);
             $printer -> text("$lineKasir\n");
+            $lineBranch = sprintf('%-13s %1.05s %-15s','Outlet',':', $this->kodebranch);
+            $printer -> text("$lineBranch\n");
 
             $printer = new Mike42\Escpos\Printer($connector);
             $printer -> selectPrintMode(1);

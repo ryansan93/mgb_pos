@@ -4,7 +4,7 @@ class Penjualan extends Public_Controller
 {
     private $pathView = 'transaksi/penjualan/';
     private $url;
-    private $hakAkses;
+    private $hasAkses;
     // private $persen_ppn;
     /**
      * Constructor

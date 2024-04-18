@@ -1604,6 +1604,8 @@ class Penjualan extends Public_Controller
             $printer -> text("$lineNoTransaksi\n");
             $lineKasir = sprintf('%-13s %1.05s %-15s','Tanggal',':', $now['waktu']);
             $printer -> text("$lineKasir\n");
+            $lineBranch = sprintf('%-13s %1.05s %-15s','Outlet',':', $kode_branch);
+            $printer -> text("$lineBranch\n");
 
             $printer = new Mike42\Escpos\Printer($connector);
             $printer -> selectPrintMode(1);
@@ -1775,6 +1777,8 @@ class Penjualan extends Public_Controller
             $printer -> text("$lineNoTransaksi\n");
             $lineKasir = sprintf('%-13s %1.05s %-15s','Tanggal',':', $waktu);
             $printer -> text("$lineKasir\n");
+            $lineBranch = sprintf('%-13s %1.05s %-15s','Outlet',':', $kode_branch);
+            $printer -> text("$lineBranch\n");
 
             $printer = new Mike42\Escpos\Printer($connector);
             $printer -> selectPrintMode(1);

@@ -789,49 +789,66 @@ var jual = {
     }, // end - hitSubTotal
 
     hitDiskon: function() {
-        var div = $('.list_diskon');
+        // var div = $('.list_diskon');
 
-        var subtotal = numeral.unformat($('.subtotal').text());
+        // var subtotal = numeral.unformat($('.subtotal').text());
 
-        var diskon = 0;
+        // var diskon = 0;
 
-        var $wrapper = $(div);
-        $wrapper.find('div.diskon').sort(function(a, b) {
-            return +a.dataset.level - +b.dataset.level;
-        })
-        .appendTo($wrapper);
+        // var $wrapper = $(div);
+        // $wrapper.find('div.diskon').sort(function(a, b) {
+        //     return +a.dataset.level - +b.dataset.level;
+        // })
+        // .appendTo($wrapper);
 
-        $.map( $(div).find('div.diskon'), function(_div) {
-            var min_beli = numeral.unformat($(_div).attr('data-minbeli'));
-            var _diskon = 0;
+        // $.map( $(div).find('div.diskon'), function(_div) {
+        //     var min_beli = numeral.unformat($(_div).attr('data-minbeli'));
+        //     var _diskon = 0;
 
-            var hit_diskon = true;
-            if ( min_beli > 0 ) {
-                if ( subtotal < min_beli ) {
-                    hit_diskon = false;
+        //     var hit_diskon = true;
+        //     if ( min_beli > 0 ) {
+        //         if ( subtotal < min_beli ) {
+        //             hit_diskon = false;
+        //         }
+        //     }
+
+        //     if ( hit_diskon ) {
+        //         var nilai = numeral.unformat($(_div).attr('data-nilai'));
+        //         if ( nilai > 0 ) {
+        //             _diskon = numeral.unformat($(_div).attr('data-nilai'));
+        //             diskon += _diskon;
+        //         }
+
+        //         var persen = numeral.unformat($(_div).attr('data-persen'));
+        //         if ( persen > 0 ) {
+        //             _diskon = subtotal * (persen / 100);
+        //             diskon += _diskon;
+        //         }
+        //     }
+
+        //     subtotal -= _diskon;
+        // });
+
+        jual.getPenjualan(function(data) {
+            $.ajax({
+                url: 'transaksi/Penjualan/hitDiskon',
+                data: {
+                    'params': data
+                },
+                type: 'POST',
+                dataType: 'JSON',
+                beforeSend: function() {},
+                success: function(data) {
+                    if ( data.status == 1 ) {
+                        $('span.diskon').text(numeral.formatDec(data.content.tot_diskon));
+
+                        jual.hitGrandTotal();
+                    } else {
+                        bootbox.alert(data.message);
+                    }
                 }
-            }
-
-            if ( hit_diskon ) {
-                var nilai = numeral.unformat($(_div).attr('data-nilai'));
-                if ( nilai > 0 ) {
-                    _diskon = numeral.unformat($(_div).attr('data-nilai'));
-                    diskon += _diskon;
-                }
-
-                var persen = numeral.unformat($(_div).attr('data-persen'));
-                if ( persen > 0 ) {
-                    _diskon = subtotal * (persen / 100);
-                    diskon += _diskon;
-                }
-            }
-
-            subtotal -= _diskon;
+            });
         });
-
-        $('span.diskon').text(numeral.formatDec(diskon));
-
-        jual.hitGrandTotal();
     }, // end - hitDiskon
 
     hitGrandTotal: function() {

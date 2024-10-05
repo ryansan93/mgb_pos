@@ -368,32 +368,195 @@ class Penjualan extends Public_Controller
 
         $today = date('Y-m-d');
 
-        $m_diskon = new \Model\Storage\Diskon_model();
-        $d_diskon = $m_diskon->where('start_date', '<=', $today)->where('end_date', '>=', $today)->with(['detail'])->get();
+        $sql_member = "";
+        if ( !empty($kode_member) ) {
+            $sql_member = "and dd.member = 1";
+        } else  {
+            $sql_member = "and dd.non_member = 1";
+        }
+
+        $m_conf = new \Model\Storage\Conf();
+        $sql = "
+            select
+                d.*,
+                case
+                    when d.tipe = 1 then
+                        dd.persen
+                    else
+                        0
+                end as persen,
+                case
+                    when d.tipe = 1 then
+                        dd.nilai
+                    else
+                        0
+                end as nilai,
+                dd.non_member,
+                dd.member,
+                dd.min_beli
+            from diskon_branch db 
+            left join
+                diskon_det dd
+                on
+                    db.diskon_kode = dd.diskon_kode
+            left join
+                diskon d
+                on
+                    dd.diskon_kode = d.kode
+            where 
+                db.branch_kode = '".$this->kodebranch."' and
+                d.start_date <= '".$today."' and d.end_date >= '".$today."'
+                ".$sql_member."
+        ";
+        $d_diskon = $m_conf->hydrateRaw( $sql );
+
+        // $m_diskon = new \Model\Storage\Diskon_model();
+        // $d_diskon = $m_diskon->where('start_date', '<=', $today)->where('end_date', '>=', $today)->with(['detail'])->get();
 
         $data = null;
         if ( $d_diskon->count() > 0 ) {
-            $d_diskon = $d_diskon->toArray();
-            foreach ($d_diskon as $key => $value) {
-                foreach ($value['detail'] as $k_det => $v_det) {
-                    if ( !empty($kode_member) ) {
-                        if ( $v_det['member'] == 1 ) {
-                            $data[] = $d_diskon[$key];
-                        }
-                    } else  {
-                        if ( $v_det['non_member'] == 1 ) {
-                            $data[] = $d_diskon[$key];
-                        }
-                    }
-                }
-            }
+            $data = $d_diskon->toArray();
+            // foreach ($d_diskon as $key => $value) {
+            //     foreach ($value['detail'] as $k_det => $v_det) {
+            //         if ( !empty($kode_member) ) {
+            //             if ( $v_det['member'] == 1 ) {
+            //                 $data[] = $d_diskon[$key];
+            //             }
+            //         } else  {
+            //             if ( $v_det['non_member'] == 1 ) {
+            //                 $data[] = $d_diskon[$key];
+            //             }
+            //         }
+            //     }
+            // }
         }
+
+        // cetak_r( $data, 1 );
 
         $content['data'] = $data;
 
         $html = $this->load->view($this->pathView . 'modal_diskon', $content, TRUE);
 
         echo $html;
+    }
+
+    public function hitDiskon()
+    {
+        $params = $this->input->post('params');
+
+        try {
+            $member = isset($params['member']) ? $params['member'] : null;
+            $kode_member = isset($params['kode_member']) ? $params['kode_member'] : null;
+            $sub_total = isset($params['sub_total']) ? $params['sub_total'] : 0;
+            $diskon = isset($params['diskon']) ? $params['diskon'] : 0;
+            $ppn = isset($params['ppn']) ? $params['ppn'] : 0;
+            $grand_total = isset($params['grand_total']) ? $params['grand_total'] : 0;
+            $list_pesanan = isset($params['list_pesanan']) ? $params['list_pesanan'] : null;
+            $list_diskon = isset($params['list_diskon']) ? $params['list_diskon'] : null;
+
+            $tot_diskon = 0;
+            if ( !empty($list_pesanan) && !empty($list_diskon) ) {
+                $list_menu = null;
+                foreach ($list_pesanan as $k_lp => $v_lp) {
+                    foreach ($v_lp['list_menu'] as $k_lm => $v_lm) {
+                        if ( !isset($list_menu[ $v_lm['kode_menu'] ]) ) {
+                            $m_conf = new \Model\Storage\Conf();
+                            $sql = "
+                                select top 1 m.* from menu m
+                                where
+                                    m.kode_menu = '".$v_lm['kode_menu']."'
+                            ";
+                            $d_conf = $m_conf->hydrateRaw( $sql );
+
+                            $kategori_id = null;
+                            if ( $d_conf->count() > 0 ) {
+                                $kategori_id = $d_conf->toArray()[0]['kategori_menu_id'];
+                            }
+
+                            $list_menu[ $v_lm['kode_menu'] ] = array(
+                                'kode_menu' => $v_lm['kode_menu'],
+                                'nama_menu' => $v_lm['nama_menu'],
+                                'harga' => $v_lm['harga'],
+                                'jumlah' => $v_lm['jumlah'],
+                                'total' => $v_lm['total'],
+                                'kategori_id' => $kategori_id
+                            );
+                        } else {
+                            $list_menu[ $v_lm['kode_menu'] ]['jumlah'] += $v_lm['jumlah'];
+                            $list_menu[ $v_lm['kode_menu'] ]['total'] += $v_lm['total'];
+                        }
+                    }
+                }
+
+                foreach ($list_diskon as $k_ld => $v_ld) {
+                    $m_conf = new \Model\Storage\Conf();
+                    $sql = "
+                        select top 1 d.* from diskon d
+                        where
+                            d.kode = '".$v_ld['kode_diskon']."'
+                    ";
+                    $d_conf = $m_conf->hydrateRaw( $sql );
+
+                    $tipe = 0;
+                    if ( $d_conf->count() > 0 ) {
+                        $tipe = $d_conf->toArray()[0]['tipe'];
+                    }
+
+                    if ( $tipe == 1 ) {
+                        $m_conf = new \Model\Storage\Conf();
+                        $sql = "
+                            select dd.* from diskon_det dd 
+                            where 
+                                dd.diskon_kode = '".$v_ld['kode_diskon']."' and
+                                dd.min_beli <= '".$sub_total."'
+                        ";
+                        $d_conf = $m_conf->hydrateRaw( $sql );
+
+                        if ( $d_conf->count() > 0 ) {
+                            $d_conf = $d_conf->toArray()[0];
+
+                            if ( $d_conf['persen'] > 0 ) {
+                                $tot_diskon += ($sub_total*($d_conf['persen']/100));
+                            } else {
+                                $tot_diskon += $d_conf['nilai'];
+                            }
+                        }
+                    }
+
+                    if ( $tipe == 2 ) {
+                        foreach ($list_menu as $k_lm => $v_lm) {
+                            $m_conf = new \Model\Storage\Conf();
+                            $sql = "
+                                select dm.* from diskon_menu dm 
+                                where 
+                                    dm.diskon_kode = '".$v_ld['kode_diskon']."' and
+                                    dm.jml_min <= '".$v_lm['jumlah']."' and
+                                    (dm.kategori_menu_id = '".$v_lm['kategori_id']."' or dm.kategori_menu_id = 'all') and
+                                    (dm.menu_kode = '".$v_lm['kode_menu']."' or dm.menu_kode = 'all')
+                            ";
+                            $d_conf = $m_conf->hydrateRaw( $sql );
+
+                            if ( $d_conf->count() > 0 ) {
+                                $d_conf = $d_conf->toArray()[0];
+
+                                if ( $d_conf['diskon_jenis'] == 'persen' ) {
+                                    $tot_diskon += ($v_lm['total']*($d_conf['diskon']/100));
+                                } else {
+                                    $tot_diskon += $d_conf['diskon'];
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            $this->result['status'] = 1;
+            $this->result['content'] = array('tot_diskon' => $tot_diskon);
+        } catch (Exception $e) {
+            $this->result['message'] = $e->getMessage();
+        }
+
+        display_json( $this->result );
     }
 
     public function savePenjualan()
@@ -1506,40 +1669,82 @@ class Penjualan extends Public_Controller
 
         $m_conf = new \Model\Storage\Conf();
         $sql = "
-            select
-                bom.nama,
-                bom.satuan,
-                sum((bom.jumlah / bom.jml_porsi) * ji.jumlah) as jumlah
-            from jual_item ji 
-            right join
-                jual j
-                on
-                    ji.faktur_kode = j.kode_faktur 
-            left join
-                (
-                    select bd.*, b.menu_kode , b.jml_porsi, i.nama from bom_det bd
-                    right join
-                        bom b
-                        on
-                            bd.id_header = b.id
-                    left join
-                        item i
-                        on
-                            i.kode = bd.item_kode
-                ) bom
-                on
-                    bom.menu_kode = ji.menu_kode 
-            where
-                bom.nama is not null and
-                j.tgl_trans between '".$start_date."' and '".$end_date."' and
-                j.kasir = '".$kasir."' and
-                j.branch = '".$kodeBranch."' and
-                j.mstatus = 1
-            group by
-                bom.nama,
-                bom.satuan
+            select * from
+            (
+                select
+                    bom.nama,
+                    bom.satuan,
+                    sum((bom.jumlah / bom.jml_porsi) * ji.jumlah) as jumlah
+                from jual_item ji 
+                right join
+                    jual j
+                    on
+                        ji.faktur_kode = j.kode_faktur 
+                left join
+                    (
+                        select bd.*, b.menu_kode , b.jml_porsi, i.nama from bom_det bd
+                        right join
+                            bom b
+                            on
+                                bd.id_header = b.id
+                        left join
+                            item i
+                            on
+                                i.kode = bd.item_kode
+                    ) bom
+                    on
+                        bom.menu_kode = ji.menu_kode 
+                where
+                    bom.nama is not null and
+                    j.tgl_trans between '".$start_date."' and '".$end_date."' and
+                    j.kasir = '".$kasir."' and
+                    j.branch = '".$kodeBranch."' and
+                    j.mstatus = 1
+                group by
+                    bom.nama,
+                    bom.satuan
+
+                union all
+
+                select
+                    bom.nama,
+                    bom.satuan,
+                    sum((bom.jumlah / bom.jml_porsi) * jid.jumlah) as jumlah
+                from jual_item_detail jid
+                left join
+                    jual_item ji 
+                    on
+                        jid.faktur_item_kode = ji.kode_faktur_item
+                right join
+                    jual j
+                    on
+                        ji.faktur_kode = j.kode_faktur 
+                left join
+                    (
+                        select bd.*, b.menu_kode , b.jml_porsi, i.nama from bom_det bd
+                        right join
+                            bom b
+                            on
+                                bd.id_header = b.id
+                        left join
+                            item i
+                            on
+                                i.kode = bd.item_kode
+                    ) bom
+                    on
+                        bom.menu_kode = jid.menu_kode 
+                where
+                    bom.nama is not null and
+                    j.tgl_trans between '".$start_date."' and '".$end_date."' and
+                    j.kasir = '".$kasir."' and
+                    j.branch = '".$kodeBranch."' and
+                    j.mstatus = 1
+                group by
+                    bom.nama,
+                    bom.satuan
+            ) data
             order by
-                bom.nama
+                data.nama
         ";
         $d_item_terpakai = $m_conf->hydrateRaw( $sql );
 

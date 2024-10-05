@@ -687,7 +687,8 @@ class Penjualan extends Public_Controller
             foreach ($v_ji['jual_item_detail'] as $k_jid => $v_jid) {
                 $jual_item_detail[ $v_jid['menu_kode'] ] = array(
                     'menu_kode' => $v_jid['menu_kode'],
-                    'menu_nama' => $v_jid['menu_nama']
+                    'menu_nama' => $v_jid['menu_nama'],
+                    'jumlah' => $v_jid['jumlah']
                 );
             }
 
@@ -1092,7 +1093,7 @@ class Penjualan extends Public_Controller
 
                     if ( !empty($v_ji['detail']) ) {
                         foreach ($v_ji['detail'] as $k_det => $v_det) {
-                            $line_detail = sprintf('%2s %13s','', $v_det['menu_nama']);
+                            $line_detail = sprintf('%2s %13s','', $v_det['menu_nama'].' @ '.$v_det['jumlah']);
                             $printer -> selectPrintMode(1);
                             $printer -> text("$line_detail\n");
                         }
@@ -1171,7 +1172,7 @@ class Penjualan extends Public_Controller
 
                     if ( !empty($v_ji['detail']) ) {
                         foreach ($v_ji['detail'] as $k_det => $v_det) {
-                            $line_detail = sprintf('%2s %13s','', $v_det['menu_nama']);
+                            $line_detail = sprintf('%2s %13s','', $v_det['menu_nama'].' @ '.$v_det['jumlah']);
                             $printer -> selectPrintMode(1);
                             $printer -> text("$line_detail\n");
                         }
@@ -2027,10 +2028,10 @@ class Penjualan extends Public_Controller
 
     public function tes()
     {
-        $kasir = 'USR2301001';
-        $date = '2023-03-25';
+        $kasir = 'USR2301002';
+        $date = '2024-04-26';
 
-        $data = $this->getDataClosingShift( $date, $kasir );
+        $data = $this->getDataClosingShift( $date, $kasir, 'JBR2' );
 
         cetak_r($data);
     }

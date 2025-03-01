@@ -1041,6 +1041,8 @@ var jual = {
 
                 var modal_body = $(this).find('.modal-body');
 
+                console.log( gKurangBayar );
+
                 var _gKembali = gBayar - gKurangBayar;
                 var gKembali = (_gKembali > 0) ? _gKembali : 0;
 
@@ -1411,7 +1413,8 @@ var jual = {
                             var tr = $(this).closest('tr.belum_bayar');
                             kodeFaktur = $(tr).find('td.kode_faktur').html();
                             gTotal = numeral.unformat($(tr).find('td.total').html());
-                            gKurangBayar = gTotal;
+                            // gKurangBayar = gTotal;
+                            gKurangBayar = numeral.unformat($(tr).find('td.kurang_bayar').html());;
 
                             jual.modalPembayaran();
                         });
@@ -1625,7 +1628,8 @@ var jual = {
         var tr = $(elm);
         kodeFaktur = $(tr).find('td.kode_faktur').text();
         gTotal = numeral.unformat($(tr).find('td.total').text());
-        gKurangBayar = gTotal;
+        // gKurangBayar = gTotal;
+        gKurangBayar = numeral.unformat($(tr).find('td.kurang_bayar').text());
 
         jual.modalPembayaran();
     }, // end - openModalPembayaran

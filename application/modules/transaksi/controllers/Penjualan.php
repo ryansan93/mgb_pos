@@ -1071,6 +1071,11 @@ class Penjualan extends Public_Controller
                 $persen_ppn = $this->getPpn( $this->kodebranch );
             }
 
+            $bayar = 0;
+            foreach ($data['bayar'] as $k_bayar => $v_bayar) {
+                $bayar += $v_bayar['jml_bayar'];
+            }
+
             /* Print a receipt */
             $printer = new Mike42\Escpos\Printer($connector);
             $printer -> initialize();
@@ -1136,9 +1141,9 @@ class Penjualan extends Public_Controller
             $printer -> text("$lineDisc\n");
             $lineTotal = sprintf('%46s %13.40s','Total Bayar. =', angkaDecimal($data['grand_total']));
             $printer -> text("$lineTotal\n");
-            $lineTunai = sprintf('%46s %13.40s','Uang Tunai. =', angkaDecimal($data['bayar'][ count($data['bayar']) -1 ]['jml_bayar']));
+            $lineTunai = sprintf('%46s %13.40s','Uang Tunai. =', angkaDecimal($bayar));
             $printer -> text("$lineTunai\n");
-            $lineKembalian = sprintf('%46s %13.40s','Kembalian. =', angkaDecimal($data['bayar'][ count($data['bayar']) -1 ]['jml_bayar'] - $data['grand_total']));
+            $lineKembalian = sprintf('%46s %13.40s','Kembalian. =', angkaDecimal($bayar - $data['grand_total']));
             $printer -> text("$lineKembalian\n");
 
             $printer = new Mike42\Escpos\Printer($connector);
@@ -1423,7 +1428,7 @@ class Penjualan extends Public_Controller
     }
 
     public function getDataBayar($_data)
-    {
+    {        
         $data = null;
         foreach ($_data as $k_data => $v_data) {
             if ( $v_data['lunas'] == 1 ) {
@@ -1431,7 +1436,7 @@ class Penjualan extends Public_Controller
                 $jml_bayar = 0;
                 if ( !empty($v_data['bayar']) ) {
                     foreach ($v_data['bayar'] as $k_bayar => $v_bayar) {
-                        $total_bayar += $v_bayar['jml_tagihan'];
+                        $total_bayar += $v_bayar['jml_bayar'];
                         $jml_bayar++;
                     }
                 }

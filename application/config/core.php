@@ -227,3 +227,5 @@ $config['nama_aplikasi'] = 'COD FRIED CHICKEN';
 
 $config['paper_size'] = '80';
 $config['print_jenis_bayar'] = 1;
+
+$config['tes'] = 'tes';

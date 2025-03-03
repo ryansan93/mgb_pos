@@ -931,6 +931,16 @@ class Penjualan extends Public_Controller
                 $persen_ppn = $this->getPpn( $this->kodebranch );
             }
 
+            $bayar_tunai = 0;
+            $bayar_non_tunai = 0;
+            foreach ($data['bayar'] as $k_bayar => $v_bayar) {
+                if ( stristr('tunai', $v_bayar['jenis_bayar']) !== FALSE ) {
+                    $bayar_tunai += $v_bayar['jml_bayar'];
+                } else {
+                    $bayar_non_tunai += $v_bayar['jml_bayar'];
+                }
+            }
+
             /* Print a receipt */
             $printer = new Mike42\Escpos\Printer($connector);
             $printer -> initialize();
@@ -1002,9 +1012,11 @@ class Penjualan extends Public_Controller
             $printer -> text("$lineDisc\n");
             $lineTotal = sprintf('%18s %13.40s','Total Bayar. =', angkaDecimal($data['grand_total']));
             $printer -> text("$lineTotal\n");
-            $lineTunai = sprintf('%18s %13.40s','Uang Tunai. =', angkaDecimal($data['bayar'][ count($data['bayar']) -1 ]['jml_bayar']));
+            $lineTunai = sprintf('%18s %13.40s','Uang Tunai. =', angkaDecimal($bayar_tunai));
             $printer -> text("$lineTunai\n");
-            $lineKembalian = sprintf('%18s %13.40s','Kembalian. =', angkaDecimal($data['bayar'][ count($data['bayar']) -1 ]['jml_bayar'] - $data['grand_total']));
+            $lineTunai = sprintf('%18s %13.40s','Non Tunai. =', angkaDecimal($bayar_non_tunai));
+            $printer -> text("$lineTunai\n");
+            $lineKembalian = sprintf('%18s %13.40s','Kembalian. =', angkaDecimal(($bayar_tunai + $bayar_non_tunai) - $data['grand_total']));
             $printer -> text("$lineKembalian\n");
 
             $printer = new Mike42\Escpos\Printer($connector);
@@ -1071,9 +1083,14 @@ class Penjualan extends Public_Controller
                 $persen_ppn = $this->getPpn( $this->kodebranch );
             }
 
-            $bayar = 0;
+            $bayar_tunai = 0;
+            $bayar_non_tunai = 0;
             foreach ($data['bayar'] as $k_bayar => $v_bayar) {
-                $bayar += $v_bayar['jml_bayar'];
+                if ( stristr('tunai', $v_bayar['jenis_bayar']) !== FALSE ) {
+                    $bayar_tunai += $v_bayar['jml_bayar'];
+                } else {
+                    $bayar_non_tunai += $v_bayar['jml_bayar'];
+                }
             }
 
             /* Print a receipt */
@@ -1141,9 +1158,11 @@ class Penjualan extends Public_Controller
             $printer -> text("$lineDisc\n");
             $lineTotal = sprintf('%46s %13.40s','Total Bayar. =', angkaDecimal($data['grand_total']));
             $printer -> text("$lineTotal\n");
-            $lineTunai = sprintf('%46s %13.40s','Uang Tunai. =', angkaDecimal($bayar));
+            $lineTunai = sprintf('%46s %13.40s','Uang Tunai. =', angkaDecimal($bayar_tunai + $bayar_non_tunai));
             $printer -> text("$lineTunai\n");
-            $lineKembalian = sprintf('%46s %13.40s','Kembalian. =', angkaDecimal($bayar - $data['grand_total']));
+            $lineTunai = sprintf('%46s %13.40s','Non Tunai. =', angkaDecimal($bayar_non_tunai));
+            $printer -> text("$lineTunai\n");
+            $lineKembalian = sprintf('%46s %13.40s','Kembalian. =', angkaDecimal(($bayar_tunai + $bayar_non_tunai) - $data['grand_total']));
             $printer -> text("$lineKembalian\n");
 
             $printer = new Mike42\Escpos\Printer($connector);

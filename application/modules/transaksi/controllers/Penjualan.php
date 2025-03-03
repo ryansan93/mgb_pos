@@ -1158,7 +1158,7 @@ class Penjualan extends Public_Controller
             $printer -> text("$lineDisc\n");
             $lineTotal = sprintf('%46s %13.40s','Total Bayar. =', angkaDecimal($data['grand_total']));
             $printer -> text("$lineTotal\n");
-            $lineTunai = sprintf('%46s %13.40s','Uang Tunai. =', angkaDecimal($bayar_tunai + $bayar_non_tunai));
+            $lineTunai = sprintf('%46s %13.40s','Uang Tunai. =', angkaDecimal($bayar_tunai));
             $printer -> text("$lineTunai\n");
             $lineTunai = sprintf('%46s %13.40s','Non Tunai. =', angkaDecimal($bayar_non_tunai));
             $printer -> text("$lineTunai\n");

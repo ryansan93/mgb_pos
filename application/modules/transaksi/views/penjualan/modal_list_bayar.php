@@ -106,7 +106,7 @@
 													$jml_transaksi++;
 													$grand_total += $value['total'];
 													$jml_bayar += $value['total_bayar'];
-													$selisih_bayar = $jml_bayar - $grand_total;
+													$selisih_bayar = $value['selisih_bayar'];
 												?>
 											<?php endforeach ?>
 										<?php else: ?>

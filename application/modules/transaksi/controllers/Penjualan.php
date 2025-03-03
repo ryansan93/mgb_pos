@@ -1452,6 +1452,7 @@ class Penjualan extends Public_Controller
         foreach ($_data as $k_data => $v_data) {
             if ( $v_data['lunas'] == 1 ) {
                 $total_bayar = 0;
+                $kembalian = 0;
                 $jml_bayar = 0;
                 if ( !empty($v_data['bayar']) ) {
                     foreach ($v_data['bayar'] as $k_bayar => $v_bayar) {
@@ -1460,12 +1461,14 @@ class Penjualan extends Public_Controller
                     }
                 }
 
+                $kembalian = ($total_bayar > $v_data['grand_total']) ? ($total_bayar - $v_data['grand_total']) : 0;
+
                 $data[ $v_data['kode_faktur'] ] = array(
                     'kode_faktur' => $v_data['kode_faktur'],
                     'pelanggan' => $v_data['member'],
                     'total' => $v_data['grand_total'],
                     'total_bayar' => $total_bayar,
-                    'selisih_bayar' => ($total_bayar - $v_data['grand_total']),
+                    'selisih_bayar' => ($total_bayar - $v_data['grand_total']) - $kembalian,
                     'jml_bayar' => $jml_bayar,
                 );
             }

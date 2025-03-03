@@ -1597,9 +1597,14 @@ class Penjualan extends Public_Controller
             $data_detail_transaksi['detail']['item_batal']['total'] = 0;
             foreach ($d_jual as $k_jual => $v_jual) {
                 if ( !empty($v_jual['bayar']) ) {
+                    $total_bayar = 0;
+                    foreach ($v_jual['bayar'] as $k_bayar => $v_bayar) {
+                        $total_bayar += $v_bayar['jml_bayar'];
+                    }
+
                     foreach ($v_jual['bayar'] as $k_bayar => $v_bayar) {
                         if ( $v_jual['mstatus'] == 1 && $v_jual['lunas'] == 1 ) {
-                            if ( $v_bayar['jml_tagihan'] <= $v_bayar['jml_bayar'] ) {
+                            if ( $v_bayar['jml_tagihan'] <= $total_bayar ) {
                                 if ( $v_bayar['jenis_bayar'] == 'tunai' ) {
                                     $urut = 0;
                                     $key_bayar = $v_bayar['jenis_bayar'];

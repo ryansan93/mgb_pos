@@ -471,7 +471,7 @@ class ListShift extends Public_Controller
                     // $nilai = $bayar - $kembalian;
                     $nilai = $bayar;
 
-                    $line = sprintf('%-46s %13.40s', strtoupper($v_urut['nama']), angkaDecimal($nilai));
+                    $line = sprintf('%-28s %13.40s', strtoupper($v_urut['nama']), angkaDecimal($nilai));
                     $printer -> text("$line\n");
 
                     // if ( stristr($k_dp, 'tunai') !== FALSE ) {
@@ -526,7 +526,7 @@ class ListShift extends Public_Controller
 
             $data = $this->getDataClosingShift( $id_closing_shift );
 
-            cetak_r( $data, 1 );
+            // cetak_r( $data, 1 );
 
             $m_cs = new \Model\Storage\ClosingShift_model();
             $d_cs = $m_cs->where('id', $id_closing_shift)->with(['user'])->orderBy('tanggal', 'desc')->first();
@@ -628,7 +628,8 @@ class ListShift extends Public_Controller
 
                     $bayar = $v_urut['bayar'];
                     $kembalian = isset($v_urut['kembalian']) ? $v_urut['kembalian'] : 0;
-                    $nilai = $bayar - $kembalian;
+                    // $nilai = $bayar - $kembalian;
+                    $nilai = $bayar;
 
                     $line = sprintf('%-46s %13.40s', strtoupper($v_urut['nama']), angkaDecimal($nilai));
                     $printer -> text("$line\n");

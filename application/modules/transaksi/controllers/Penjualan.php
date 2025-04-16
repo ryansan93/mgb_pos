@@ -1908,23 +1908,32 @@ class Penjualan extends Public_Controller
                 foreach ($v_dp as $k_urut => $v_urut) {
                     $printer -> setJustification(0);
                     $printer -> selectPrintMode(1);
-                    if ( stristr($k_dp, 'tunai') !== FALSE ) {
-                        // $printer -> textRaw(strtoupper($v_dp['nama'])."\n");
 
-                        // if ( isset($v_dp) ) {
-                        //     foreach ($v_dp as $k_det => $v_det) {
-                        //         if ( stristr($k_det, 'nama') === FALSE ) {
-                        //             $line = sprintf('%-28s %13.40s', strtoupper($k_det), angkaDecimal($v_det));
-                        //             $printer -> text("$line\n");
-                        //         }
-                        //     }
-                        // }
-                        $line = sprintf('%-28s %13.40s', strtoupper($v_urut['nama']), angkaDecimal($v_urut['tagihan']));
-                        $printer -> text("$line\n");
-                    } else {
-                        $line = sprintf('%-28s %13.40s', strtoupper($v_urut['nama']), angkaDecimal($v_urut['bayar']));
-                        $printer -> text("$line\n");
-                    }
+                    $bayar = $v_urut['bayar'];
+                    $kembalian = isset($v_urut['kembalian']) ? $v_urut['kembalian'] : 0;
+                    // $nilai = $bayar - $kembalian;
+                    $nilai = $bayar;
+
+                    $line = sprintf('%-28s %13.40s', strtoupper($v_urut['nama']), angkaDecimal($nilai));
+                    $printer -> text("$line\n");
+
+                    // if ( stristr($k_dp, 'tunai') !== FALSE ) {
+                    //     // $printer -> textRaw(strtoupper($v_dp['nama'])."\n");
+
+                    //     // if ( isset($v_dp) ) {
+                    //     //     foreach ($v_dp as $k_det => $v_det) {
+                    //     //         if ( stristr($k_det, 'nama') === FALSE ) {
+                    //     //             $line = sprintf('%-28s %13.40s', strtoupper($k_det), angkaDecimal($v_det));
+                    //     //             $printer -> text("$line\n");
+                    //     //         }
+                    //     //     }
+                    //     // }
+                    //     $line = sprintf('%-28s %13.40s', strtoupper($v_urut['nama']), angkaDecimal($v_urut['tagihan']));
+                    //     $printer -> text("$line\n");
+                    // } else {
+                    //     $line = sprintf('%-28s %13.40s', strtoupper($v_urut['nama']), angkaDecimal($v_urut['bayar']));
+                    //     $printer -> text("$line\n");
+                    // }
 
                     $printer -> textRaw("\n");
                 }

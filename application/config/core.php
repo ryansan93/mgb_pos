@@ -6,7 +6,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  */
 
 // Site Details
-$config['site_version']          = "00.01.00";
+$config['site_version']          = "00.02.00";
 $config['public_theme']          = "Default";
 $config['admin_theme']           = "Admin";
 
@@ -227,3 +227,5 @@ $config['nama_aplikasi'] = 'COD FRIED CHICKEN';
 
 $config['paper_size'] = '80';
 $config['print_jenis_bayar'] = 1;
+
+$config['tes'] = 'tes';

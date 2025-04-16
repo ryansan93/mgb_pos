@@ -1982,7 +1982,7 @@ class Penjualan extends Public_Controller
             $now = $conf->getDate();
 
             $waktu = $now['waktu'];
-            $kode_branch = $this->userdata['kodeBranch'];
+            $kode_branch = $this->userdata['kodeBranch']; 
 
             $data = $this->getDataClosingShift( $now['tanggal'], $this->userid, $kode_branch );
 

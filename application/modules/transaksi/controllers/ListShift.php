@@ -342,8 +342,6 @@ class ListShift extends Public_Controller
             'detail_pembayaran' => $data_detail_pembayaran
         );
 
-        // cetak_r( $data, 1 );
-
         return $data;
     }
 
@@ -351,7 +349,7 @@ class ListShift extends Public_Controller
     {
         $params = $this->input->post('params');
 
-        $id_closing_shift = $params['id'];
+        $id_closing_shift = $params['id']; 
 
         if ( $this->config->item('paper_size') == '58' ) {
             $result = $this->printClosingShift58($id_closing_shift);

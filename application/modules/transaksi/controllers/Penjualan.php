@@ -2084,7 +2084,8 @@ class Penjualan extends Public_Controller
 
                     $bayar = $v_urut['bayar'];
                     $kembalian = isset($v_urut['kembalian']) ? $v_urut['kembalian'] : 0;
-                    $nilai = $bayar - $kembalian;
+                    // $nilai = $bayar - $kembalian;
+                    $nilai = $bayar;
 
                     $line = sprintf('%-46s %13.40s', strtoupper($v_urut['nama']), angkaDecimal($nilai));
                     $printer -> text("$line\n");

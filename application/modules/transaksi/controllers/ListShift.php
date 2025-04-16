@@ -526,6 +526,8 @@ class ListShift extends Public_Controller
 
             $data = $this->getDataClosingShift( $id_closing_shift );
 
+            cetak_r( $data, 1 );
+
             $m_cs = new \Model\Storage\ClosingShift_model();
             $d_cs = $m_cs->where('id', $id_closing_shift)->with(['user'])->orderBy('tanggal', 'desc')->first();
             $d_cs_prev = $m_cs->where('tanggal', '<', $d_cs->tanggal)->where('user_id', $d_cs->user_id)->with(['user'])->orderBy('tanggal', 'desc')->first();

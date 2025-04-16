@@ -242,19 +242,19 @@ class ListShift extends Public_Controller
                 if ( !empty($v_jual['bayar']) ) {
                     foreach ($v_jual['bayar'] as $k_bayar => $v_bayar) {
                         if ( $v_jual['mstatus'] == 1 && $v_jual['lunas'] == 1 ) {
-                            if ( $v_bayar['jml_tagihan'] <= $v_bayar['jml_bayar'] ) {
+                            // if ( $v_bayar['jml_tagihan'] <= $v_bayar['jml_bayar'] ) {
                                 if ( $v_bayar['jenis_bayar'] == 'tunai' ) {
                                     $urut = 0;
                                     $key_bayar = $v_bayar['jenis_bayar'];
                                     if ( !isset( $data_detail_pembayaran['detail'][ $urut ][ $key_bayar ] ) ) {
                                         $data_detail_pembayaran['detail'][ $urut ][ $key_bayar ] = array(
                                             'nama' => 'TUNAI',
-                                            'bayar' => $v_bayar['jml_bayar'],
+                                            'bayar' => ($v_bayar['jml_tagihan'] < $v_bayar['jml_bayar']) ? $v_bayar['jml_tagihan'] : $v_bayar['jml_bayar'],
                                             'tagihan' => $v_bayar['jml_tagihan'],
                                             'kembalian' => $v_bayar['jml_bayar'] - $v_bayar['jml_tagihan']
                                         );
                                     } else {
-                                        $data_detail_pembayaran['detail'][ $urut ][ $key_bayar ]['bayar'] += $v_bayar['jml_bayar'];
+                                        $data_detail_pembayaran['detail'][ $urut ][ $key_bayar ]['bayar'] += ($v_bayar['jml_tagihan'] < $v_bayar['jml_bayar']) ? $v_bayar['jml_tagihan'] : $v_bayar['jml_bayar'];
                                         $data_detail_pembayaran['detail'][ $urut ][ $key_bayar ]['tagihan'] += $v_bayar['jml_tagihan'];
                                         $data_detail_pembayaran['detail'][ $urut ][ $key_bayar ]['kembalian'] += $v_bayar['jml_bayar'] - $v_bayar['jml_tagihan'];
                                     }
@@ -264,15 +264,15 @@ class ListShift extends Public_Controller
                                     if ( !isset( $data_detail_pembayaran['detail'][ $urut ][ $key_bayar ] ) ) {
                                         $data_detail_pembayaran['detail'][ $urut ][ $key_bayar ] = array(
                                             'nama' => $v_bayar['jenis_kartu']['nama'],
-                                            'bayar' => $v_bayar['jml_bayar']
+                                            'bayar' => ($v_bayar['jml_tagihan'] < $v_bayar['jml_bayar']) ? $v_bayar['jml_tagihan'] : $v_bayar['jml_bayar']
                                         );
                                     } else {
-                                        $data_detail_pembayaran['detail'][ $urut ][ $key_bayar ]['bayar'] += $v_bayar['jml_bayar'];
+                                        $data_detail_pembayaran['detail'][ $urut ][ $key_bayar ]['bayar'] += ($v_bayar['jml_tagihan'] < $v_bayar['jml_bayar']) ? $v_bayar['jml_tagihan'] : $v_bayar['jml_bayar'];
                                     }
                                 }
 
                                 $data_detail_pembayaran['grand_total'] += $v_bayar['jml_tagihan'];
-                            }
+                            // }
                         }
                     }
 
@@ -341,6 +341,8 @@ class ListShift extends Public_Controller
             'detail_transaksi' => $data_detail_transaksi,
             'detail_pembayaran' => $data_detail_pembayaran
         );
+
+        // cetak_r( $data, 1 );
 
         return $data;
     }

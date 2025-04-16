@@ -1633,7 +1633,7 @@ class Penjualan extends Public_Controller
                                     }
                                 }
 
-                                $data_detail_pembayaran['grand_total'] += $v_bayar['jml_tagihan'];
+                                $data_detail_pembayaran['grand_total'] += ($v_bayar['jml_tagihan'] < $v_bayar['jml_bayar']) ? $v_bayar['jml_tagihan'] : $v_bayar['jml_bayar'];
                             // }
                         }
                     }

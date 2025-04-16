@@ -1784,8 +1784,6 @@ class Penjualan extends Public_Controller
             $data_item_terpakai = $d_item_terpakai->toArray();
         }
 
-        // cetak_r( $data_detail_pembayaran, 1);
-
         $data = array(
             'detail_transaksi' => $data_detail_transaksi,
             'detail_pembayaran' => $data_detail_pembayaran,

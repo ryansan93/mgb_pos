@@ -1572,19 +1572,19 @@ class Penjualan extends Public_Controller
                 if ( !empty($v_jual['bayar']) ) {
                     foreach ($v_jual['bayar'] as $k_bayar => $v_bayar) {
                         if ( $v_jual['mstatus'] == 1 && $v_jual['lunas'] == 1 ) {
-                            if ( $v_bayar['jml_tagihan'] <= $v_bayar['jml_bayar'] ) {
-                                if ( $v_bayar['jenis_bayar'] == 'tunai' ) {
+                            // if ( $v_bayar['jml_tagihan'] <= $v_bayar['jml_bayar'] ) {
+                                if ( stristr('tunai', $v_bayar['jenis_bayar']) !== false ) {                                    
                                     $urut = 0;
                                     $key_bayar = $v_bayar['jenis_bayar'];
                                     if ( !isset( $data_detail_pembayaran['detail'][ $urut ][ $key_bayar ] ) ) {
                                         $data_detail_pembayaran['detail'][ $urut ][ $key_bayar ] = array(
                                             'nama' => 'TUNAI',
-                                            'bayar' => $v_bayar['jml_bayar'],
+                                            'bayar' => ($v_bayar['jml_tagihan'] < $v_bayar['jml_bayar']) ? $v_bayar['jml_tagihan'] : $v_bayar['jml_bayar'],
                                             'tagihan' => $v_bayar['jml_tagihan'],
                                             'kembalian' => $v_bayar['jml_bayar'] - $v_bayar['jml_tagihan']
                                         );
                                     } else {
-                                        $data_detail_pembayaran['detail'][ $urut ][ $key_bayar ]['bayar'] += $v_bayar['jml_bayar'];
+                                        $data_detail_pembayaran['detail'][ $urut ][ $key_bayar ]['bayar'] += ($v_bayar['jml_tagihan'] < $v_bayar['jml_bayar']) ? $v_bayar['jml_tagihan'] : $v_bayar['jml_bayar'];
                                         $data_detail_pembayaran['detail'][ $urut ][ $key_bayar ]['tagihan'] += $v_bayar['jml_tagihan'];
                                         $data_detail_pembayaran['detail'][ $urut ][ $key_bayar ]['kembalian'] += $v_bayar['jml_bayar'] - $v_bayar['jml_tagihan'];
                                     }
@@ -1594,15 +1594,15 @@ class Penjualan extends Public_Controller
                                     if ( !isset( $data_detail_pembayaran['detail'][ $urut ][ $key_bayar ] ) ) {
                                         $data_detail_pembayaran['detail'][ $urut ][ $key_bayar ] = array(
                                             'nama' => $v_bayar['jenis_kartu']['nama'],
-                                            'bayar' => $v_bayar['jml_bayar']
+                                            'bayar' => ($v_bayar['jml_tagihan'] < $v_bayar['jml_bayar']) ? $v_bayar['jml_tagihan'] : $v_bayar['jml_bayar']
                                         );
                                     } else {
-                                        $data_detail_pembayaran['detail'][ $urut ][ $key_bayar ]['bayar'] += $v_bayar['jml_bayar'];
+                                        $data_detail_pembayaran['detail'][ $urut ][ $key_bayar ]['bayar'] += ($v_bayar['jml_tagihan'] < $v_bayar['jml_bayar']) ? $v_bayar['jml_tagihan'] : $v_bayar['jml_bayar'];
                                     }
                                 }
 
                                 $data_detail_pembayaran['grand_total'] += $v_bayar['jml_tagihan'];
-                            }
+                            // }
                         }
                     }
 
@@ -1751,6 +1751,8 @@ class Penjualan extends Public_Controller
         if ( $d_item_terpakai->count() > 0 ) {
             $data_item_terpakai = $d_item_terpakai->toArray();
         }
+
+        // cetak_r( $data_detail_pembayaran, 1);
 
         $data = array(
             'detail_transaksi' => $data_detail_transaksi,
@@ -2233,10 +2235,10 @@ class Penjualan extends Public_Controller
 
     public function tes()
     {
-        $kasir = 'USR2301002';
-        $date = '2024-04-26';
+        $kasir = 'USR2501002';
+        $date = '2025-04-15';
 
-        $data = $this->getDataClosingShift( $date, $kasir, 'JBR2' );
+        $data = $this->getDataClosingShift( $date, $kasir, 'JBR6' );
 
         cetak_r($data);
     }

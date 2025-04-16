@@ -1595,6 +1595,7 @@ class Penjualan extends Public_Controller
             $data_detail_transaksi['detail']['item_batal']['nama'] = 'menu batal';
             $data_detail_transaksi['detail']['item_batal']['jumlah'] = 0;
             $data_detail_transaksi['detail']['item_batal']['total'] = 0;
+
             foreach ($d_jual as $k_jual => $v_jual) {
                 if ( !empty($v_jual['bayar']) ) {
                     $total_bayar = 0;

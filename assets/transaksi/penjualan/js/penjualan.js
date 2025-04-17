@@ -667,7 +667,15 @@ var jual = {
 
                     var _total = _harga * _jumlah;
 
-                    $(div).find('.jumlah').text(numeral.formatInt(_jumlah));
+                    $(div).find('div.menu_utama .jumlah').text(numeral.formatInt(_jumlah));
+
+                    $.map( $(div).find('div.detail .jumlah'), function(span_jml) {
+                        var jml_detail = numeral.unformat( $(span_jml).text() );
+                        var jml_baru = jml_detail * _jumlah;
+
+                        $(span_jml).text( numeral.formatInt( jml_baru ) );
+                    });
+
                     $(div).find('.total').text(numeral.formatInt(_total));
 
                     jual.hitSubTotal();
